@@ -133,15 +133,24 @@ async function main() {
 
   const pivots = section("pivots");
   ok("pivots: 4-6 returned", !!pivots && pivots.sentences.length >= 4 && pivots.sentences.length <= 6, `got ${pivots?.sentences.length}`);
-  // The spec fixes the form as "when they say X, you say Y", but the natural
-  // openers vary — mention/ask/bring up all read correctly. An earlier version
-  // of this check only matched "say" and wrongly failed 3 of 4 good pivots.
-  const wellFormed =
-    pivots?.sentences.filter(
-      (s) =>
-        /\b(when|if) they (say|mention|ask|bring|raise|push|object)/i.test(s.text) &&
-        /you say/i.test(s.text),
-    ) ?? [];
+  // Test the STRUCTURE, not one token. Two earlier versions of this check
+  // failed good pivots over surface wording: first by demanding "when they say"
+  // when the model wrote "when they mention", then by demanding "you say" when
+  // it wrote the equally correct "say:". What actually matters is that each
+  // pivot has a trigger, a reply marker, and both halves as quoted speech —
+  // that is what separates a line you can read aloud from a stage direction.
+  const isWellFormed = (text: string) => {
+    const hasTrigger = /\b(when|if) they (say|mention|ask|bring|raise|push|object)/i.test(text);
+    const hasReplyMarker = /\b(you say|say)\s*:/i.test(text);
+    // At least two quoted spans: what they say, and what you say back.
+    const quoted = text.match(/["“][^"”]{8,}["”]/g) ?? [];
+    // A stage direction tells the founder what to do instead of what to say.
+    const isStageDirection =
+      /\b(you say|say)\s*:?\s*(point out|acknowledge|emphasi[sz]e|highlight|mention that|explain that|remind them)/i.test(text);
+    return hasTrigger && hasReplyMarker && quoted.length >= 2 && !isStageDirection;
+  };
+
+  const wellFormed = pivots?.sentences.filter((s) => isWellFormed(s.text)) ?? [];
   ok(
     "pivots: follow the 'when they say X, you say Y' shape",
     wellFormed.length >= (pivots?.sentences.length ?? 0) - 1,

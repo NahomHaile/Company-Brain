@@ -78,9 +78,11 @@ X must be something this prospect would plausibly say out loud on the call — a
 
 Y must be short enough to say out loud from memory, without reading it off a screen. One or two sentences. It must be grounded in the evidence and never invented. Where it helps, end Y with a question that hands the conversation back to them.
 
-FORMAT, and this is not negotiable: each pivot reads
+FORMAT, and this is not negotiable. Each pivot is exactly this, including the literal words "When they say" and "you say:":
 
   When they say "<what they say>", you say: "<what you say back>"
+
+Do not shorten "you say:" to "say:". Do not substitute "respond with" or "reply". The founder is scanning this under time pressure and the two halves have to be visually identical in every pivot.
 
 Both halves are in quotes, because both are things a person says out loud.
 

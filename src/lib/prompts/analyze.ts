@@ -94,9 +94,16 @@ export async function rankDifferentiators(
     formatEvidence(evidence),
   ].join("\n");
 
-  return callClaude({
+  const ranked = await callClaude({
     system: DIFFERENTIATOR_SYSTEM,
     user,
     schema: DifferentiatorArray,
   });
+
+  // Sort here rather than trusting the prompt. A live run returned these out of
+  // order despite the instruction, and ordering is a deterministic operation —
+  // the same reason §3.1 keeps arithmetic out of the model. The downstream
+  // sections read "the top differentiators", so the order is load-bearing.
+  // Ties keep the model's original sequence, which carries its own judgment.
+  return [...ranked].sort((a, b) => b.materiality - a.materiality);
 }
