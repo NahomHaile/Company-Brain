@@ -1,42 +1,26 @@
-<div align="center">
-
 # Cadence
 
-**The sales hire an early founder can't afford yet.**
-
-Two URLs in. A competitor battlecard out — in about thirty seconds, with a verbatim
-receipt behind every single sentence.
-
-`Chatathon 2026` · `Track 01 — Misneach` · `Northeastern`
-
-</div>
-
----
-
-Maya takes six to nine discovery calls a week and spends **45–70 minutes preparing for each
-one**. Cadence does that prep in thirty seconds and hands her something she can defend on a
-live call — every claim traceable to a quote, every risky phrase flagged before she says it
-out loud.
-
-The part that matters isn't the drafting. It's that **she stays in control of every word**.
-
----
-
-## The problem
+**Cadence is the sales hire an early founder can't afford yet.**
 
 Our persona is **Maya Okonkwo**, the solo, non-technical founder of **Thicket** — a seed-stage
 company selling scheduling software to independent veterinary clinics, at roughly $41K MRR with
-six employees, no SDR and no sales engineer. Her bottleneck is specific and measurable: five to
-nine hours a week reading the prospect's site, re-reading a competitor's pricing page, and
+six employees, no SDR and no sales engineer. Her bottleneck is specific and measurable: **she
+takes six to nine discovery calls a week and spends 45–70 minutes preparing for each one** — five
+to nine hours a week reading the prospect's site, re-reading a competitor's pricing page, and
 working out what to say when that competitor comes up. That is an SDR's job, and an SDR costs
-$60–70K fully loaded.
+$60–70K fully loaded. Cadence does the prep in about thirty seconds and hands her something she
+can actually defend on a live call.
 
-> **Maya Okonkwo and Thicket are synthetic**, created for this demonstration, as is every price
-> and product claim attributed to Thicket. The competitor and prospect pages used in the demo are
-> real, public marketing pages, named on screen. Time-savings figures are persona-research
-> estimates, not measured studies, and are labelled as such wherever they appear.
+**Maya Okonkwo and Thicket are synthetic, created for this demonstration**, as is every price and
+product claim attributed to Thicket. The competitor and prospect pages used in the demo are real,
+public marketing pages, named on screen. Time-savings figures are persona-research estimates, not
+measured studies, and are labelled as such wherever they appear.
 
-### The thing that actually takes the hour
+Built for **Chatathon 2026 · Track 01 (Misneach) · Northeastern**.
+
+---
+
+## The thing that actually takes the hour
 
 The painful part of call prep is not finding information. It is *deciding what is material for
 this specific prospect* and *knowing what to say when the competitor comes up*. A scraper that
@@ -44,33 +28,24 @@ dumps a feature list solves the easy fifteen minutes. So Cadence spends its effo
 points — the lines Maya says out loud when a prospect mentions a competitor — and on making every
 one of them defensible.
 
----
+Three design decisions follow from that, and they are the whole product:
 
-## Four rules the whole product is built on
+**The model never computes a number.** Price deltas, per-seat normalisation and tier comparisons
+are deterministic TypeScript in `src/lib/pricing.ts`. The model extracts prices; code compares
+them. In our demo run this pays off immediately: the competitor publishes no prices at all, so
+every comparison honestly reports `cheaper: "unknown"` with a caveat, instead of inventing a
+percentage. A judge who catches "40% cheaper" when it is 28% has found a hole you cannot recover
+from in a five-minute demo.
 
-**1 · The model never computes a number.**
-Price deltas, per-seat normalisation and tier comparisons are deterministic TypeScript in
-`src/lib/pricing.ts`. The model extracts prices; code compares them. In our demo run this pays
-off immediately: the competitor publishes no prices at all, so every comparison honestly reports
-`cheaper: "unknown"` with a caveat instead of inventing a percentage. A judge who catches
-"40% cheaper" when it's 28% has found a hole you cannot recover from in a five-minute demo.
+**Every sentence carries its sources.** Each generated sentence holds the `evidence_id`s it came
+from, and each piece of evidence holds a verbatim quote plus the URL it was taken from. An empty
+evidence list is a grounding flag, not a default. On a battlecard this is existential: if Maya
+says "they charge $200 a seat" and the prospect says "no they don't", the deal is gone.
 
-**2 · Provenance on every sentence.**
-Each sentence carries the `evidence_id`s it came from; each piece of evidence carries a verbatim
-`quote` and a `source_url`. An empty `evidence_ids` array is a grounding flag, not a default.
-Hover any sentence in the canvas and the receipt appears instantly.
-
-**3 · Flag, never silently rewrite.**
-Risky spans get a `RiskFlag` with a pre-written safer alternative. Maya approves or replaces it.
-Auto-sanitising would mean she never learns what was risky — and owner control is the entire
-argument for why this isn't a ChatGPT prompt.
-
-**4 · Parallelise everything independent.**
-The six section prompts, the two page fetches, and the grounding audit + risk flagger all run
-concurrently. Sequential is ~50s and kills the demo; parallel is ~10s. This is enforced by a
-test that fails if the audit stage stops running concurrently.
-
----
+**We flag, we never silently rewrite.** Risky spans — absolute superiority claims, disparagement,
+stale pricing — get a category, an explanation and a pre-written safer alternative. Maya approves
+or redacts. Auto-sanitising would mean she never learns what was risky, and owner control is the
+entire argument for why this is not a ChatGPT prompt.
 
 ## One engine, two recipes
 
@@ -79,166 +54,27 @@ INGEST → EVIDENCE (with provenance) → RANK MATERIALITY → DRAFT SECTIONS
    → ASSEMBLE → DE-ROBOTIFY → GROUND AUDIT + RISK FLAG → REVIEW CANVAS → EXPORT
 ```
 
-Every box is shared. The **battlecard** ingests two URLs and drafts positioning, pricing, where
-we win, where they win, pivot points and discovery questions. The **investor update** ingests
-pasted notes and drafts headline, metrics, highlights, lowlights and asks. Same evidence type,
-same ranking, same grounding audit, same risk flagger, same canvas, same export — one `recipe`
+Every box is shared. The **battlecard** ingests two URLs and drafts positioning, pricing, where we
+win, where they win, pivot points and discovery questions. The **investor update** ingests pasted
+notes and drafts headline, metrics, highlights, lowlights and asks. Same evidence type, same
+ranking, same grounding audit, same risk flagger, same canvas, same export — one `recipe`
 parameter apart.
-
-The review canvas never branches on `recipe`. It iterates sections generically, so the second
-recipe cost no extra canvas code at all.
-
----
-
-## Quickstart
-
-```bash
-git clone https://github.com/NahomHaile/Company-Brain.git
-cd Company-Brain
-npm install
-
-cp .env.example .env.local     # then add your ANTHROPIC_API_KEY
-npm run dev
-```
-
-Open **`http://localhost:3000`**. Both URL fields are prefilled with the demo pair, so the whole
-workflow is one click.
-
-| Command | What it does |
-|---|---|
-| `npm run dev` | Dev server |
-| `npm test` | 57 unit tests — no test framework installed, runs on Node's built-in runner |
-| `npm run lint` | ESLint |
-| `npm run build` | Production build |
-
-**No key? It still runs.** `/review` falls back to a complete sample battlecard and badges itself
-`CACHED — sample data`, so you can explore the product surface with no API access at all.
-
----
-
-## Using it
-
-### 1 · Generate a battlecard
-
-`/` — two URL fields, one **Generate battlecard** button. That's the entire non-technical
-workflow. Named progress stages light up as each one lands: *Fetching pages → Reading evidence →
-Comparing pricing → Ranking differences → Writing your card → Checking every claim.*
-
-### 2 · Review it — this is the product
-
-`/review` is where Maya decides whether to stake her credibility on the draft.
-
-| Action | What happens |
-|---|---|
-| **Hover any sentence** | Its verbatim source quote appears instantly, with a clickable source URL and the date it was fetched |
-| **Sentence with no source** | Amber dotted underline and a gutter mark — visually distinct from a risk flag, because "no receipt" and "this could expose you" are different problems |
-| **Click a highlighted span** | Category in plain English, why it's risky, and a pre-written safer phrasing |
-| **Use safer wording** | The span is replaced in place — the sentence visibly heals and the flag count drops |
-| **Keep as written** | The flag clears, the wording stands. Maya's call, not the model's |
-| **Edit any sentence** | Click ✎, type, commit with ⌘/Ctrl+Enter or blur. Escape cancels |
-| **Edit away a flagged span** | The flag moves to a "no longer matches this sentence" strip. **It is never silently deleted** |
-
-Risk severity is carried by underline weight against a single hue — `low` dotted, `medium` solid,
-`high` solid with a wash — rather than three different colours, so a card with several flags
-doesn't read as a traffic light.
-
-Everything is keyboard reachable: Tab to a sentence, Enter opens its receipt.
-
-### 3 · Export it
-
-Copy as Markdown (sources included), or **Print / Save as PDF** for a one-page pre-call sheet —
-that's the format, because Maya opens it thirty seconds before a call. No PDF library:
-`window.print()` plus a print stylesheet.
-
-What you export is what you approved. The canvas holds the reviewed copy, so Maya's edits and
-redactions travel into the Markdown and the PDF — not the original draft.
-
-### 4 · The offline path
-
-`http://localhost:3000/?demo=cached` renders a complete battlecard from
-`data/fixtures/demo-battlecard.json` with **no API call and no network access at all**. It's there
-because conference wifi fails and a five-minute demo has no room to recover. The card it renders
-is badged `CACHED`, honestly.
-
----
-
-## The five-minute demo
-
-1. **The problem.** Maya, 45–70 minutes a call, six to nine calls a week.
-2. **One click.** Paste two URLs, hit Generate, watch the named stages land.
-3. **The receipt.** Hover a pricing sentence — the competitor's verbatim line appears with its
-   URL. Every sentence has one.
-4. **The catch.** A sentence says "the only platform that charges over $200 a seat." It's
-   highlighted. Click it: *absolute superiority claim — comparative advertising exposure.*
-   Hit **Use safer wording** and watch the sentence heal.
-5. **The number.** Point at the price table: the competitor is quote-only above one tier, so
-   Cadence says **"Not comparable"** rather than inventing a percentage. Code computed that, not
-   the model.
-6. **Breadth.** Same engine, `recipe: "investor_update"` — different document, zero new canvas code.
-
----
-
-## How it works
-
-```
- ┌── Target URL ──┐   ┌── Competitor URL ──┐      [investor recipe: paste box]
- └───────┬────────┘   └─────────┬──────────┘
-         └──── Promise.all ─────┘
-                    ▼
-      fetch-page.ts  → robots check → text extract → cache
-                    ▼
-      Evidence Extractor  ──►  EVIDENCE STORE  ◄── provenance root
-                    │                │            (verbatim quote + URL)
-                    ▼                ▼
-      Pricing Extractor     PRICING ENGINE (deterministic TypeScript)
-                    └────────┬───────┘
-                             ▼
-            Feature Matrix  →  Differentiator Ranker
-                             ▼
-        ══════ PARALLEL FAN-OUT — Promise.all ══════
-        Positioning · Pricing · Pivot points
-        Where they win · Discovery questions
-        ═════════════════════════════════════════════
-                             ▼
-                   Assembly & coherence
-                             ▼
-                    De-robotify pass
-                             ▼
-         ┌───────────────────┴──────────────────┐
-         ▼                                      ▼
-   Grounding audit                        Risk flagger
-         └───────────────────┬──────────────────┘
-                             ▼
-               ╔═══════════════════════════╗
-               ║      REVIEW CANVAS        ║ ← the product surface
-               ║  edit · approve · replace ║
-               ╚═══════════════════════════╝
-                             ▼
-                Export → Markdown / PDF / mailto
-```
-
-**Latency budget:** fetch 5s (parallel) → evidence 4s → matrix + rank 4s → fan-out 10s →
-assemble + de-robotify 5s → audit + flag 4s (parallel) ≈ **32s**. The staged progress indicator
-turns a hang into visible work.
-
-**Every model response is validated** against its Zod schema from `src/lib/contracts.ts` before
-anything downstream touches it. Unvalidated JSON from a model is a runtime crash during a demo.
 
 ---
 
 ## Honesty contract
 
-### ✅ Working
+### ✅ Actually working
 
 Live URL fetch and text extraction · evidence extraction with verbatim quotes and source URLs ·
-deterministic pricing comparison · differentiator ranking · battlecard drafting · grounding
-audit · risk flagging with approve/replace · review canvas with hover-to-source, inline editing
-and flag demotion · Markdown and PDF export · investor-update recipe on the same engine
+deterministic pricing comparison · differentiator ranking · full battlecard drafting · grounding
+audit · risk flagging with approve/redact · review canvas with hover-to-source · Markdown and PDF
+export · investor-update recipe on the same engine
 
 ### 🟡 Simulated — each renders a visible badge in the UI
 
-- **Cached page fetches for the demo** — badge: `CACHED — fetched 1:50 PM`. Live fetch is real;
-  we cache the demo pair for wifi safety.
+- **Cached page fetches for the demo** — badge: `CACHED — fetched 1:50 PM`. Live fetch is real; we
+  cache the demo pair for wifi safety.
 - **CRM / calendar connectors** — the buttons on the investor-update page load fixtures. Badge:
   `SIMULATED CONNECTOR`. There is no Slack app, CRM integration or calendar behind them.
 - **Send / share** — `mailto:` hands a draft to your own mail client. Badge: `SIMULATED SEND`.
@@ -280,28 +116,16 @@ way a person with a browser would fetch them.
 
 ---
 
-## Testing
+## Running it
 
 ```bash
-npm test     # 57 tests
+npm install
+cp .env.example .env.local     # then add your ANTHROPIC_API_KEY
+npm run dev
 ```
 
-No test framework is installed — Node 24 strips TypeScript natively, so the suite runs on the
-built-in runner with zero added dependencies. Tests cover the logic where a silent bug would be
-invisible and expensive:
-
-| Area | What's pinned down |
-|---|---|
-| Span matching | Overlapping risk spans, spans orphaned by an edit, redaction in place |
-| Grounding | The 30-day staleness line; evidence with no timestamp is explicitly *not* stale |
-| Pricing display | Every value of the `cheaper` enum, negative deltas, quote-only tiers |
-| State | Redacting two flags on one sentence in sequence; resolved flags leaving the UI |
-| Audit pipeline | **That grounding and risk actually run concurrently** — the test fails if they go sequential |
-| Handoff | Malformed or missing run data falls back instead of blanking the page |
-
----
-
-## Security
+Open `http://localhost:3000`. Both URL fields are prefilled with the demo pair, so the whole
+workflow is one click.
 
 `.env.local` is gitignored and no key has ever been committed. Verify with:
 
@@ -309,9 +133,23 @@ invisible and expensive:
 git log -p --all | grep -E "sk-ant-[A-Za-z0-9_-]{20,}"   # must return nothing
 ```
 
-Note the pattern rather than a bare `grep -i "sk-ant"`: this repo's own docs contain that string
-several times, so the loose check always "finds" something and teaches you to ignore it. The
-pattern above matches a real key and nothing else.
+Note the pattern rather than a bare `grep -i "sk-ant"`: this repo's own docs
+contain that string several times, so the loose check always "finds" something and
+teaches you to ignore it. The pattern above matches a real key and nothing else.
+
+### The offline path
+
+`http://localhost:3000/?demo=cached` renders a complete battlecard from
+`data/fixtures/demo-battlecard.json` with **no API call and no network access at all** — the
+fixture is imported into the bundle, not fetched. It is there because conference wifi fails and a
+five-minute demo has no room to recover. The card it renders is badged `CACHED`, honestly.
+
+### Printing
+
+The **Print / Save as PDF** button produces a one-page pre-call sheet — that is the format,
+because Maya opens it thirty seconds before a call. `ExportBar` renders the print sheet itself and
+portals it to `<body>`, so the PDF is byte-identical whichever screen you print from. No PDF
+library: `window.print()` plus a print stylesheet.
 
 ---
 
@@ -331,9 +169,8 @@ src/
     anthropic.ts              # client, callClaude(), retry, validation
     fetch-page.ts             # robots check, fetch, cheerio, rate limit, cache
     pricing.ts                # deterministic comparison — no model
-    prompts/                  # evidence, analysis, drafting, audit
-    review/                   # span matching, grounding, audit pipeline, handoff
     pipeline-client.ts        # drives the routes in order; documents the seam
+    demo-config.ts            # demo pair, stage names, cached-run envelope
     battlecard-markdown.ts    # Deliverable → Markdown, sources included
   components/                 # input panels, progress stages, canvas, export, badges
 data/fixtures/                # evidence, pricing, battlecard, and the cached demo run
@@ -354,14 +191,10 @@ fit in a query string.
 
 ## Stack
 
-Next.js (App Router) · TypeScript · Tailwind + shadcn/ui on Base UI · `@anthropic-ai/sdk` · Zod
-for every model response · `cheerio` for HTML→text · React state and a JSON file store ·
-`react-markdown` · deployed on Vercel.
-
-No database, no ORM, no auth library, no PDF library — each of those costs more of a three-hour
-build than it returns.
-
----
+Next.js (App Router) · TypeScript · Tailwind + shadcn/ui · `@anthropic-ai/sdk` · Zod for every
+model response · `cheerio` for HTML→text · React state and a JSON file store · `react-markdown` ·
+deployed on Vercel. No database, no ORM, no auth library, no PDF library — each of those costs
+more of a three-hour build than it returns.
 
 ## AI agents used to build this
 
@@ -369,7 +202,6 @@ Cadence was built by four people in a three-hour sprint, each pairing with **Cla
 Claude Opus 5**. The build spec (`CADENCE-BUILD-SPEC.md`) and the always-on agent rules
 (`CLAUDE.md`) were written first and given to every agent session, which is what let four people
 work in parallel against frozen contracts without colliding: file ownership is assigned per person
-in `CLAUDE.md`, and `src/lib/contracts.ts` has exactly one owner.
-
-The application itself calls the Anthropic API for evidence extraction, drafting, grounding audit
-and risk flagging — **never for arithmetic**.
+in `CLAUDE.md`, and `src/lib/contracts.ts` has exactly one owner. The application itself calls the
+Anthropic API for evidence extraction, drafting, grounding audit and risk flagging — never for
+arithmetic.
