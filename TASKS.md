@@ -63,21 +63,30 @@ Only edit **your own** person's section, plus the shared gates at the top.
 - [x] `ProvenancePopover.tsx` — hover a sentence → verbatim `quote` + `source_url`. **Best five seconds of the demo. Make it instant.**
 - [x] `RiskFlag.tsx` — inline highlight in the text, **not** a sidebar; click → category, why, suggested alternative, Approve / Redact
 - [x] Unsourced sentences get a visible warning treatment
-- [ ] C1 de-robotify → `Deliverable`
-- [ ] C2 grounding auditor → `GroundingIssue[]`
-- [ ] C3 risk flagger → `RiskFlag[]`
-- [!] `src/app/api/audit/route.ts` — run grounding + risk in parallel *(blocked: needs A's `src/lib/anthropic.ts` + `callClaude`; prompts land first, route after)*
+- [x] C1 de-robotify → `Deliverable`
+- [x] C2 grounding auditor → `GroundingIssue[]`
+- [x] C3 risk flagger → `RiskFlag[]`
+- [!] `src/app/api/audit/route.ts` — run grounding + risk in parallel *(**blocked on A**: needs `src/lib/anthropic.ts` + `callClaude`. Prompts are done and pushed; the route is ~15 min once the client lands.)*
 - [x] `src/app/review/page.tsx`
 - [x] Inline editing on any sentence
-- [ ] *(stretch, only if ahead at 2:45)*
+- [ ] *(stretch, only if ahead at 2:45)* objection simulator
 
-**C notes — 2:14 PM.** Canvas is live at `/review` on branch `ryan`, 27 unit tests green, build clean.
-Built against a C-owned edge-case sample; swaps to `data/fixtures/battlecard.json` automatically the moment A lands it, no code change.
+**C status — 2:22 PM · branch `ryan` · 27 unit tests green, typecheck clean, build clean.**
+
+Canvas is live at `/review`. Verified end-to-end in a real browser, not just typechecked:
+hover → verbatim quote + live source link · paste-sourced evidence renders no dead link ·
+redact heals the sentence and the flag count drops · editing a sentence moves an orphaned
+flag to a visible strip instead of deleting it · keyboard Tab+Enter opens provenance ·
+**investor-update recipe renders with zero canvas changes** (tested with a real
+`recipe: "investor_update"` deliverable; tables correctly disappear when empty).
+
+Built against a C-owned edge-case sample. Swaps to `data/fixtures/battlecard.json`
+automatically the moment A lands it — no code change, already tested against both.
 
 **Three things the rest of you need:**
-1. **A — `Deliverable` has no `evidence` field.** `Sentence.evidence_ids` points at records the object doesn't carry, so provenance can't resolve from a `Deliverable` alone. Also means D's `?demo=cached` run shows *zero* provenance. Please add `evidence: z.array(Evidence)`.
-2. **B — `FeatureMatrix.tsx` is yours**, but §11.4 #5 also assigns the matrix to C. Canvas leaves a slot; send me the prop signature so we don't both build a table. C renders `price_comparisons` (unassigned in the spec).
-3. **Everyone — the repo is Next 16 + shadcn v4 on Base UI, not Radix.** Popover/Dialog APIs differ from the spec's assumption. Also added `allowImportingTsExtensions` to `tsconfig.json` (additive, build verified).
+1. **A — `Deliverable` has no `evidence` field.** `Sentence.evidence_ids` points at records the object doesn't carry, so provenance cannot resolve from a `Deliverable` alone. This also means D's `?demo=cached` run would show **zero** provenance — the feature the demo is built on. Please add `evidence: z.array(Evidence)`. The loader already reads it when present.
+2. **B — `FeatureMatrix.tsx` is yours**, but §11.4 #5 also assigns the matrix to C. The canvas leaves a `featureMatrix` slot; send me the prop signature so we don't both build a table. C renders `price_comparisons` (unassigned in the spec).
+3. **Everyone — this repo is Next 16 + shadcn v4 on Base UI, not Radix.** Popover/Dialog APIs differ from what §6 assumes. Two shared-file changes, both additive and build-verified: `allowImportingTsExtensions` in `tsconfig.json`, and the agent-rules block `next dev` appends to `CLAUDE.md`.
 
 ## Person D — Shell, Export, Integration, Demo
 
