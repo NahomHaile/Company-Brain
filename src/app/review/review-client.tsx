@@ -71,6 +71,7 @@ export function ReviewClient({
 
   const openFlags = openFlagCount(deliverable);
   const gaps = deliverable.grounding_issues.length;
+  const ready = openFlags === 0 && gaps === 0;
 
   // A live run is the only thing that earns no badge.
   const badge =
@@ -100,20 +101,30 @@ export function ReviewClient({
           <div className="flex flex-wrap items-baseline gap-x-5 gap-y-1">
             <Stat>Drafted {draftedLabel}</Stat>
             <Stat>{wordCount(deliverable)} words</Stat>
-            <span
-              className={`text-[11px] ${openFlags > 0 ? "font-medium text-[#9E3320]" : "text-[#6B7076]"}`}
-            >
-              {openFlags === 0
-                ? "No open flags"
-                : `${openFlags} ${openFlags === 1 ? "flag" : "flags"} to review`}
-            </span>
-            <span
-              className={`text-[11px] ${gaps > 0 ? "font-medium text-[#9E3320]" : "text-[#6B7076]"}`}
-            >
-              {gaps === 0
-                ? "Every claim sourced"
-                : `${gaps} ${gaps === 1 ? "claim" : "claims"} to check`}
-            </span>
+            {/* The status line is the progress bar. It has to stay true at every
+                step: clearing flags never implies the unsourced claims went
+                away, because a card that says it is ready when it is not is
+                the exact failure this product exists to prevent. */}
+            {ready ? (
+              <span className="text-[11px] font-medium text-[#14171A]">
+                Ready for the call
+              </span>
+            ) : (
+              <>
+                <span
+                  className={`text-[11px] ${openFlags > 0 ? "font-medium text-[#9E3320]" : "text-[#14171A]"}`}
+                >
+                  {openFlags === 0
+                    ? "All flags reviewed"
+                    : `${openFlags} ${openFlags === 1 ? "flag" : "flags"} to review`}
+                </span>
+                {gaps > 0 && (
+                  <span className="text-[11px] font-medium text-[#9E3320]">
+                    {gaps} {gaps === 1 ? "claim" : "claims"} to check
+                  </span>
+                )}
+              </>
+            )}
           </div>
         </header>
 

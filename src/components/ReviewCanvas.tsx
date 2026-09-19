@@ -152,7 +152,9 @@ function SentenceRow({
   );
 
   return (
-    <div className="group grid grid-cols-[1fr_1.25rem] gap-x-2">
+    <div
+      className={`${styles.row} group -mx-2 grid grid-cols-[1fr_1.25rem] gap-x-2 rounded-sm px-2 py-0.5`}
+    >
       {/* An unsourced line carries a proofreader's rule in the margin: the note
           is about the line, not about any word in it. */}
       <div

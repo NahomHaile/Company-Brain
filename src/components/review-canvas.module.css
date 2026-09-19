@@ -8,23 +8,41 @@
    box-decoration-break repeats it per line when the span wraps. Ink stays dark
    on yellow — never light text on the marker (§8). */
 .flagged {
-  background: linear-gradient(
+  background-image: linear-gradient(
     to right,
     transparent 0,
     #f2e85c 2px,
     #f2e85c calc(100% - 3px),
     transparent 100%
   );
+  background-repeat: no-repeat;
+  background-position: left center;
   -webkit-box-decoration-break: clone;
   box-decoration-break: clone;
   padding: 0.1em 0.15em;
   color: #14171a;
   cursor: pointer;
   border-radius: 1px;
+
+  /* The one deliberate moment on the page: on load the marker draws itself
+     across every flagged phrase at once. Watching the card get marked up is
+     the product's argument — the machine flags, the founder decides — and a
+     single gesture reads as intent where a staggered cascade reads as stock
+     animation. It answers nothing the reader did, so it happens once. */
+  animation: swipe 420ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+@keyframes swipe {
+  from {
+    background-size: 0% 100%;
+  }
+  to {
+    background-size: 100% 100%;
+  }
 }
 
 .flagged:hover {
-  background: linear-gradient(
+  background-image: linear-gradient(
     to right,
     transparent 0,
     #eddf3c 2px,
@@ -43,6 +61,16 @@
    traffic light. */
 .severityHigh {
   box-shadow: inset 0 -0.62em 0 -0.5em #9e3320;
+}
+
+/* The line under the pointer tints, so it reads as live rather than printed.
+   Motion and colour here answer an action; nothing animates on its own. */
+.row {
+  transition: background-color 120ms ease-out;
+}
+
+.row:hover {
+  background-color: #6b70760a;
 }
 
 /* Provenance: a dotted pencil underline. This is the affordance — an unmarked
@@ -75,7 +103,12 @@
 
 /* Motion answers an action only (§8). */
 @media (prefers-reduced-motion: reduce) {
-  .flagged,
+  .flagged {
+    animation: none;
+    background-size: 100% 100%;
+  }
+
+  .row,
   .sourced {
     transition: none;
   }
@@ -145,9 +178,14 @@
 
   /* A filled highlighter costs ink and greys out on a mono printer. */
   .flagged {
-    background: none;
+    animation: none;
+    background-image: none;
     box-shadow: inset 0 -0.14em 0 0 #f2e85c;
     padding: 0;
+  }
+
+  .row:hover {
+    background-color: transparent;
   }
 
   .sourced {
