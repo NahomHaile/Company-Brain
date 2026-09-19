@@ -14,6 +14,7 @@ import type {
   Sentence,
 } from "@/lib/contracts";
 import { buildEvidenceIndex, resolveEvidence } from "@/lib/review/evidence";
+import { money, priceDeltaLabel } from "@/lib/review/format";
 import {
   editSentence,
   pendingFlagsFor,
@@ -30,9 +31,6 @@ const ISSUE_LABEL: Record<GroundingIssue["issue"], string> = {
   stale_evidence: "Source may be out of date",
 };
 
-function money(value: number | null): string {
-  return value === null ? "—" : `$${value}`;
-}
 
 /** Nothing is computed here. Every number is read from Person A's pricing engine (spec 3.1). */
 function PriceComparisons({ rows }: { rows: PriceComparison[] }) {
@@ -66,14 +64,20 @@ function PriceComparisons({ rows }: { rows: PriceComparison[] }) {
                   {money(row.normalized_monthly_per_seat_theirs)}
                 </td>
                 <td className="py-2.5">
-                  {row.delta_abs === null || row.delta_pct === null ? (
-                    <span className="text-[#B3701A]">Not comparable</span>
-                  ) : (
-                    <span className="tabular-nums">
-                      {money(row.delta_abs)} ({row.delta_pct}%
-                      {row.cheaper === "ours" ? " cheaper" : " more"})
-                    </span>
-                  )}
+                  {(() => {
+                    const label = priceDeltaLabel(row);
+                    return (
+                      <span
+                        className={
+                          label.kind === "incomparable"
+                            ? "text-[#B3701A]"
+                            : "tabular-nums"
+                        }
+                      >
+                        {label.text}
+                      </span>
+                    );
+                  })()}
                   {row.caveat && (
                     <span className="mt-1 block text-xs text-[#1A1A17]/55">
                       {row.caveat}

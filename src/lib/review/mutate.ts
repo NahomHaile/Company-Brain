@@ -40,13 +40,16 @@ export function resolveFlag(
         )
       : deliverable.sections;
 
-  return {
+  const next: Deliverable = {
     ...deliverable,
     sections,
     risk_flags: deliverable.risk_flags.map((f) =>
       f.id === flagId ? { ...f, status: resolution } : f,
     ),
   };
+
+  // Approving changes no text, so leave the count alone.
+  return resolution === "redacted" ? withWordCount(next) : next;
 }
 
 export function editSentence(
@@ -54,12 +57,21 @@ export function editSentence(
   sentenceId: string,
   text: string,
 ): Deliverable {
-  return {
+  return withWordCount({
     ...deliverable,
     sections: mapSentences(deliverable, (sentence) =>
       sentence.id === sentenceId ? { ...sentence, text } : sentence,
     ),
-  };
+  });
+}
+
+/**
+ * Person D's export reads `word_count` off the deliverable rather than
+ * recomputing it, so every text change has to refresh it. A stale count ships
+ * a card whose header contradicts its own prose.
+ */
+function withWordCount(deliverable: Deliverable): Deliverable {
+  return { ...deliverable, word_count: wordCount(deliverable) };
 }
 
 /** Only pending flags are highlighted or chased. Resolved means done. */

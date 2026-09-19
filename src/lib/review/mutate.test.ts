@@ -88,3 +88,21 @@ test("word count tracks the current text, not the fixture field", () => {
   const next = editSentence(SAMPLE_DELIVERABLE, "s_01", "Three words here.");
   assert.equal(wordCount(next), 241 - 20 + 3);
 });
+
+test("editing refreshes word_count on the deliverable itself", () => {
+  // Person D's export reads this field, not our live header count. If it goes
+  // stale the exported card carries a number that contradicts the prose.
+  const next = editSentence(SAMPLE_DELIVERABLE, "s_01", "Three words here.");
+  assert.equal(next.word_count, wordCount(next));
+  assert.notEqual(next.word_count, SAMPLE_DELIVERABLE.word_count);
+});
+
+test("redacting refreshes word_count too", () => {
+  const next = resolveFlag(SAMPLE_DELIVERABLE, "rf_002", "redacted");
+  assert.equal(next.word_count, wordCount(next));
+});
+
+test("approving leaves word_count untouched because the text did not change", () => {
+  const next = resolveFlag(SAMPLE_DELIVERABLE, "rf_002", "approved");
+  assert.equal(next.word_count, SAMPLE_DELIVERABLE.word_count);
+});
