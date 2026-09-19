@@ -10,8 +10,8 @@ Only edit **your own** person's section, plus the shared gates at the top.
 
 ## Gates — everyone watches these
 
-- [ ] **1:05 · CONTRACTS FROZEN** — `src/lib/contracts.ts` pushed, A announces in chat
-- [ ] **1:20 · FIXTURES UP** — `data/fixtures/` has valid `evidence.json`, `pricing.json`, `battlecard.json`. B, C, D are idle until this lands.
+- [x] **1:05 · CONTRACTS FROZEN** — `src/lib/contracts.ts` pushed, A announces in chat
+- [x] **1:20 · FIXTURES UP** — `data/fixtures/` has valid `evidence.json`, `pricing.json`, `battlecard.json`. B, C, D are idle until this lands.
 - [ ] **2:00 · Checkpoint 1** — 5-min standup. Live Vercel URL exists. Contract problems surface now or never.
 - [ ] **2:45 · Checkpoint 2** — first end-to-end run. It will break; that's why it's now.
 - [ ] **3:15 · FEATURE FREEZE — HARD**
@@ -24,70 +24,154 @@ Only edit **your own** person's section, plus the shared gates at the top.
 
 **Blocks everyone. Contracts and fixtures come before your own features.**
 
-- [ ] `src/lib/contracts.ts` — all Zod schemas from §7 *(pre-seeded from the spec — review, correct, and announce the freeze; this file is yours alone from here)*
-- [ ] `data/fixtures/evidence.json` — valid `Evidence[]`, realistically messy
-- [ ] `data/fixtures/pricing.json` — valid `PriceTier[]`, include a `"Contact us"` tier with `price_amount: null`
-- [ ] `data/fixtures/battlecard.json` — one complete `Deliverable`, one stale `fetched_at`
-- [ ] `src/lib/anthropic.ts` — client, `callClaude()`, JSON-only enforcement, fence stripping, one retry, Zod validation
-- [ ] **Verify the model ID resolves with one live call** (see CLAUDE.md — spec's `claude-sonnet-4-6` is unconfirmed)
-- [ ] `src/lib/fetch-page.ts` — robots.txt check, identifying UA, cheerio extract, 1 req/sec, cache
-- [ ] `src/lib/prompts/evidence.ts` — A2 evidence extractor → `Evidence[]`
-- [ ] A3 pricing extractor → `PriceTier[]`
-- [ ] `src/lib/pricing.ts` — deterministic comparison, **no model**
-- [ ] Number verifier — regex every number out of generated narrative, assert membership in the pricing table
-- [ ] `src/app/api/fetch/route.ts`
-- [ ] `src/app/api/ingest/route.ts` (recipe 2)
+- [x] `src/lib/contracts.ts` — all Zod schemas from §7 *(pre-seeded from the spec — review, correct, and announce the freeze; this file is yours alone from here)*
+- [x] `data/fixtures/evidence.json` — valid `Evidence[]`, realistically messy
+- [x] `data/fixtures/pricing.json` — valid `PriceTier[]`, include a `"Contact us"` tier with `price_amount: null`
+- [x] `data/fixtures/battlecard.json` — one complete `Deliverable`, one stale `fetched_at`
+- [x] `src/lib/anthropic.ts` — client, `callClaude()`, JSON-only enforcement, fence stripping, one retry, Zod validation
+- [x] **Verify the model ID resolves with one live call** — DONE, all five IDs resolve:
+      `claude-sonnet-5` (MODEL_MAIN), `claude-haiku-4-5` (MODEL_CHEAP), `claude-opus-5`
+      (MODEL_DEEP), and both unconfirmed IDs — spec §6's `claude-sonnet-4-6` **does
+      resolve**, as does `claude-haiku-4-5-20251001`. No 404 risk from the model string.
+      *(`scripts/verify-model.ts` had a top-level-`await` that tsx rejects under CJS, so
+      it could never run; wrapped in `main()`. The crash looked like a tsx error rather
+      than a missing key, which is why it read as blocked.)*
+- [x] `src/lib/fetch-page.ts` — robots.txt check, identifying UA, cheerio extract, 1 req/sec, cache
+- [x] `src/lib/prompts/evidence.ts` — A2 evidence extractor → `Evidence[]`
+- [x] A3 pricing extractor → `PriceTier[]`
+- [x] `src/lib/pricing.ts` — deterministic comparison, **no model**
+- [x] Number verifier — regex every number out of generated narrative, assert membership in the pricing table
+- [x] `src/app/api/fetch/route.ts`
+- [x] `src/app/api/ingest/route.ts` (recipe 2)
 - [ ] *(stretch, only if ahead at 2:30)*
 
 ## Person B — Competitive Analysis & Drafting
 
 **Work against A's fixtures. Do not wait for live routes.**
 
-- [ ] B1 feature matrix → `FeatureRow[]`
-- [ ] B2 differentiator ranker → `Differentiator[]`
-- [ ] B3 positioning → `Section`
-- [ ] B5 pivot points → `Section` *(the differentiator — give it your best hour)*
-- [ ] B6 landmines / where they win → `Section`
-- [ ] B4 pricing narrative → `Section` *(narrate only values already in the table)*
-- [ ] B7 discovery questions → `Section`
-- [ ] B9 assembly → `Deliverable` — **preserve evidence_ids through merges**
-- [ ] Fan out all six section prompts with `Promise.all` — sequential is a demo-killer
-- [ ] `FeatureMatrix.tsx`
-- [ ] *(2:30)* investor-update recipe on the same engine
+> On branch `person-b/analysis-drafting`. **Verified live against Anthropic:
+> 26/26 live checks and 130/130 static checks pass, clean run, zero warnings.**
+> tsc, eslint and `next build` all green.
+>
+> Live suite: `npx tsx src/lib/prompts/_dev/verify-live.ts` (~9 API calls).
+> Static suite: `npx tsx src/lib/prompts/_dev/verify-b.ts` (no key needed).
+>
+> **⚠ LATENCY — D please read.** A clean run takes **94s** for /api/draft
+> (fan-out 14s, assembly 80s) and **44s** for /api/analyze. maxDuration is now
+> 300s and 120s. Vercel Hobby caps functions well below 300s — if the cap
+> cannot be raised, the demo must go through §12.5's cached path.
+>
+> Temporary shim in `src/lib/prompts/_dev/` — deleted the moment A lands the
+> real client.
+
+- [~] B1 feature matrix → `FeatureRow[]`
+- [~] B2 differentiator ranker → `Differentiator[]`
+- [~] B3 positioning → `Section`
+- [~] B5 pivot points → `Section` *(the differentiator — give it your best hour)*
+- [~] B6 landmines / where they win → `Section`
+- [!] B4 pricing narrative → `Section` — **verified live: states no number absent
+      from the table.** Still **blocked on A's `pricing.ts`** for real
+      `PriceComparison[]`; the hand-written table it runs against is not demo-safe.
+- [~] B7 discovery questions → `Section`
+- [~] B9 assembly → `Deliverable` — evidence_id preservation is now **enforced in
+      code**, not just asked for in the prompt; on violation we keep the unassembled draft
+- [~] Fan out all six section prompts — `Promise.allSettled`, measured parallel
+- [~] `FeatureMatrix.tsx` — **⚠ nothing imports it. C or D needs to render it or it
+      ships dead.** Props: `{ rows: FeatureRow[], ourLabel?, theirLabel? }`
+- [~] *(2:30)* investor-update recipe on the same engine — `?dev=1&recipe=investor_update`
+- [~] **Sixth section `we_win`** — spec §10 has no prompt for it though `contracts.ts`
+      lists the key. Written as `WE_WIN_SYSTEM`. **Nobody else should write a second one.**
+
+### For A
+
+- `src/lib/anthropic.ts` — B's shim is on the frozen §9.3 `callClaude` signature, so
+  the swap is a one-line import change in `analyze.ts` and `draft.ts`. Worth keeping
+  from the shim: lazy client construction (at module scope a missing key breaks
+  `next build`, not just the request), a 30s per-call timeout, `stop_reason:
+  "max_tokens"` truncation detection, and a sonnet→haiku degradation chain.
+- **Model ID:** spec §6 pins `claude-sonnet-4-6`. It resolves, but `claude-sonnet-5`
+  is newer *and* cheaper ($2/$10 per MTok vs $3/$15). Shim uses Sonnet 5.
+- `contracts.ts` is still **unfrozen**. Everything B built validates against it as-is.
+
+### For C
+
+- B's output adds three fields alongside the `Deliverable`: `degraded`,
+  `missing_sections`, `warnings`. When `degraded` is true the canvas should show
+  something — a partial card currently renders as a whole one, which §4 forbids.
+- Sentence ids are namespaced `<section>_s1`. Guaranteed unique across sections, so
+  `risk_flags.sentence_id` and `grounding_issues.sentence_id` are safe to key on.
+- Citations pointing at nonexistent evidence are stripped before you see them, so a
+  provenance hover can never resolve to nothing. Stripped sentences end up with an
+  empty `evidence_ids`, which your audit already treats as unsourced.
+
+### For D
+
+- **README needs a prompt-injection limitation.** Evidence quotes are verbatim text
+  from competitor-controlled web pages, interpolated into prompts. Accepted risk for a
+  3-hour build, but it should be named in §4's "not built" list rather than left silent.
+- `.env.example` should mention `ANTHROPIC_WORKSPACE_ID` — org-scoped keys are
+  rejected without it.
+- Sample data is behind an explicit `?dev=1` and returns `synthetic: true`. **Badge it.**
 
 ## Person C — Grounding, Risk, Review Canvas
 
-**The canvas is the product surface. Build it entirely against `battlecard.json`.**
+- [x] `ReviewCanvas.tsx` · [x] `ProvenancePopover.tsx` · [x] `RiskFlag.tsx`
+- [x] Unsourced sentences get a visible warning treatment
+- [x] C1 de-robotify · [x] C2 grounding auditor · [x] C3 risk flagger
+- [x] Audit pipeline — C1 → `Promise.all([C2, C3])` → `verifyNumbers`
+- [x] **`src/app/api/audit/route.ts`** — unblocked by A's merge, registers as `ƒ /api/audit`
+- [x] `src/app/review/page.tsx` · [x] Inline editing on any sentence
+- [x] Wired to D's `sessionStorage` handoff (`cadence:run`)
+- [x] Built to the design direction — two columns, highlighter / pencil / stamp annotations
+- [ ] *(stretch)* objection simulator
 
-- [ ] `ReviewCanvas.tsx` against fixture `Deliverable` — zero dependency on B
-- [ ] `ProvenancePopover.tsx` — hover a sentence → verbatim `quote` + `source_url`. **Best five seconds of the demo. Make it instant.**
-- [ ] `RiskFlag.tsx` — inline highlight in the text, **not** a sidebar; click → category, why, suggested alternative, Approve / Redact
-- [ ] Unsourced sentences get a visible warning treatment
-- [ ] C1 de-robotify → `Deliverable`
-- [ ] C2 grounding auditor → `GroundingIssue[]`
-- [ ] C3 risk flagger → `RiskFlag[]`
-- [ ] `src/app/api/audit/route.ts` — run grounding + risk in parallel
-- [ ] `src/app/review/page.tsx`
-- [ ] Inline editing on any sentence
-- [ ] *(stretch, only if ahead at 2:45)*
+**C is done — 12/12. 3:25 PM · branch `ryan` · PR #1 · 69 tests, lint, typecheck, build all clean.**
+
+Person A's branch is merged into `ryan`, and **the A→C handoff is verified live**: `/review`
+now renders A's real `battlecard.json` — 25 sentences, 20 evidence records, their actual
+1:48 PM fetch time on the CACHED badge. The sample fallback no longer fires.
+
+`/api/audit` accepts `{ recipe, deliverable, evidence, price_tiers }` exactly as D's
+`pipeline-client.ts` posts it, and returns `{ deliverable }`. `price_tiers` is accepted and
+ignored — every number is checked against `deliverable.price_comparisons`, which A's
+`pricing.ts` computed.
+
+**Still needed from the rest of you:**
+1. **B — push, even unfinished.** `/api/analyze` and `/api/draft` are the only things left
+   between here and a live end-to-end run. A route returning a fixture is enough to wire against.
+2. **D — two integration points.** The canvas exposes an `exportBar` **render prop** handed your
+   exact `RunResult` shape *with Maya's edits applied*; import `ExportBar` into
+   `review-client.tsx` and it works. Swap your `HonestyBadge` in for C's inline one.
+   Note `/review` now prints to one page on its own (0.96 of A4) — compare with your PrintSheet
+   so we don't ship two print paths.
+3. **D — the favicon will break the build again** if regenerated as 8-bit RGB. Turbopack needs
+   RGBA; it was 500ing every route until re-encoded.
+4. **A — `Deliverable` still has no `evidence` field.** Provenance works because C falls back to
+   `evidence.json`, but a bare `Deliverable` can't self-resolve. Also `battlecard.json` says
+   `word_count: 612` against 599 real words — C recomputes on load, so the UI is right regardless.
 
 ## Person D — Shell, Export, Integration, Demo
 
 **You own the outcome. If integration fails, the project fails, and nobody else is watching for it.**
 
+> Everything ticked below is committed on `person-D` and **not yet pushed** — D pushes on the owner's say-so.
+> The route contract the shell calls is documented at the top of `src/lib/pipeline-client.ts`. A/B/C: build to it, or tell D and D will change the shell.
+
 - [x] `create-next-app`, deps, shadcn components installed
 - [x] Directory tree created so nobody invents a different one
 - [x] `.env.local` gitignored · `.env.example` committed
-- [ ] Public GitHub repo · **all four added as collaborators** · clone URL posted in chat
-- [ ] Vercel connected, placeholder deploys
-- [ ] `page.tsx` — two URL inputs + one **Generate battlecard** button, prefilled with the demo pair
-- [ ] `ProgressStages.tsx` — named stages: Fetching pages → Reading evidence → Comparing pricing → Ranking differences → Writing your card → Checking every claim
-- [ ] Badges from §4 on every simulated/cached surface
-- [ ] `update/page.tsx` paste box *(2:30; skip if behind)*
-- [ ] Export: copy-to-clipboard Markdown
-- [ ] Print stylesheet — **must fit one page**
-- [ ] `mailto:` with `SIMULATED SEND` badge
-- [ ] **(by 2:00) Vercel deploy live**
-- [ ] **(3:00) Cached demo run → `data/fixtures/demo-battlecard.json` + `?demo=cached`** — wifi insurance, non-negotiable
-- [ ] README: persona, bottleneck, §4 verbatim, §4.1 fetching ethics, setup, AI agents used
-- [ ] *(2:45 onward)* stop building, drive integration, own the A→B and B→C handoffs
+- [ ] Public GitHub repo · **all four added as collaborators** · clone URL posted in chat *(blocked: needs the owner's GitHub account)*
+- [ ] Vercel connected, placeholder deploys *(blocked: needs the owner's Vercel account)*
+- [x] `page.tsx` — two URL inputs + one **Generate battlecard** button, prefilled with the demo pair
+- [x] `ProgressStages.tsx` — named stages: Fetching pages → Reading evidence → Comparing pricing → Ranking differences → Writing your card → Checking every claim
+- [x] Badges from §4 on every simulated/cached surface — `CACHED`, `SIMULATED CONNECTOR`, `SIMULATED SEND`, plus `SYNTHETIC FIXTURE` while the cached run is hand-written
+- [x] `update/page.tsx` paste box, with the simulated Slack/CRM/calendar connectors
+- [x] Export: copy-to-clipboard Markdown, sources kept as footnotes
+- [x] Print stylesheet — **verified one page** at Letter
+- [x] `mailto:` with `SIMULATED SEND` badge
+- [ ] **(by 2:00) Vercel deploy live** *(blocked with the Vercel connection above)*
+- [~] **Cached demo run → `data/fixtures/demo-battlecard.json` + `?demo=cached`** — works offline now, but the file is hand-written from real quotes off both demo pages. **Replace it with a real captured run once the pipeline is live** and flip `captured_from_live_run` to `true`; the `SYNTHETIC FIXTURE` badge then disappears on its own.
+- [x] README: persona, bottleneck, §4 verbatim, §4.1 fetching ethics, setup, AI agents used
+- [ ] *(2:45 onward)* stop building, drive integration, own the A→B and B→C handoffs *(waiting on the first route to exist — every route currently 404s and the shell reports that honestly)*
+
+**Demo pair chosen and verified** (§16 says do this early — done): prospect `smalldoorvet.com/membership`, competitor `digitail.com/pricing`. Both return static HTML, both allowed by `robots.txt`, both content-rich. Digitail publishes **no prices at all**, which is a gift: every price comparison honestly reports `unknown` instead of a made-up percentage.

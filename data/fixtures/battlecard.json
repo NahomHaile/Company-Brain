@@ -1,0 +1,337 @@
+{
+  "recipe": "battlecard",
+  "title": "Thicket vs. VetFlow",
+  "subject_label": "Thicket vs. VetFlow — for Brookside Animal Hospital",
+  "sections": [
+    {
+      "key": "positioning",
+      "title": "Positioning",
+      "sentences": [
+        {
+          "id": "s_001",
+          "text": "Brookside runs three locations in the Hudson Valley with a team of 14, so lead with what happens between the sites rather than with scheduling itself.",
+          "evidence_ids": ["ev_009", "ev_010"]
+        },
+        {
+          "id": "s_002",
+          "text": "Their own appointments page says records requests between locations take one to two business days — that is the problem we remove, and they wrote it down themselves.",
+          "evidence_ids": ["ev_012", "ev_017"]
+        },
+        {
+          "id": "s_003",
+          "text": "They also say online booking is coming soon, which means someone there already owns this decision and has a timeline.",
+          "evidence_ids": ["ev_011"]
+        }
+      ]
+    },
+    {
+      "key": "pricing",
+      "title": "Pricing",
+      "sentences": [
+        {
+          "id": "s_004",
+          "text": "At ten seats, Thicket Multi-Site is $45 per seat per month against VetFlow Clinic at $79 — a difference of $34 per seat per month, or 43%.",
+          "evidence_ids": ["ev_015", "ev_002"]
+        },
+        {
+          "id": "s_005",
+          "text": "Say the comparison carefully: VetFlow Clinic is published as $948 per user per year, so that $79 assumes they commit for twelve months, and VetFlow also holds a five-seat floor where we have none.",
+          "evidence_ids": ["ev_002", "ev_001", "ev_014"]
+        },
+        {
+          "id": "s_006",
+          "text": "VetFlow Enterprise above 25 users is quote-only, so there is no published number to compare against and we should not invent one.",
+          "evidence_ids": ["ev_003"]
+        }
+      ]
+    },
+    {
+      "key": "we_win",
+      "title": "Where we win",
+      "sentences": [
+        {
+          "id": "s_007",
+          "text": "Records sync across locations in real time, with no transfer request and no waiting — Brookside's current one-to-two-day gap is the exact thing this closes.",
+          "evidence_ids": ["ev_017", "ev_012"]
+        },
+        {
+          "id": "s_008",
+          "text": "Full API access is included on Multi-Site at no extra cost, where VetFlow sells the API as a paid add-on and only on Clinic and above.",
+          "evidence_ids": ["ev_015", "ev_004"]
+        },
+        {
+          "id": "s_009",
+          "text": "We are the only scheduling platform built for veterinary practices from the ground up.",
+          "evidence_ids": []
+        },
+        {
+          "id": "s_010",
+          "text": "We bill monthly with no seat minimum, so a three-location practice can start on the locations that hurt most instead of buying for everyone on day one.",
+          "evidence_ids": ["ev_014", "ev_015", "ev_001"]
+        }
+      ]
+    },
+    {
+      "key": "they_win",
+      "title": "Where they win",
+      "sentences": [
+        {
+          "id": "s_011",
+          "text": "VetFlow integrates with Antech natively and we do not — Antech is on our roadmap for Q1, and if Brookside sends work to Antech that is a real gap today.",
+          "evidence_ids": ["ev_008", "ev_018"]
+        },
+        {
+          "id": "s_012",
+          "text": "Their about page says they use IDEXX in-house at all three locations, so ask before you concede anything; if they are IDEXX-only this gap may not touch them.",
+          "evidence_ids": ["ev_013", "ev_018"]
+        },
+        {
+          "id": "s_013",
+          "text": "VetFlow has an implementation team that gets most practices live in under two weeks, and we do not staff that — be straight about it and offer to run the migration yourself.",
+          "evidence_ids": ["ev_020"]
+        },
+        {
+          "id": "s_014",
+          "text": "They claim over 2,400 practices in North America, which is a fair answer to a reference request and we should not try to match it.",
+          "evidence_ids": ["ev_006"]
+        }
+      ]
+    },
+    {
+      "key": "pivots",
+      "title": "Pivot points",
+      "sentences": [
+        {
+          "id": "s_015",
+          "text": "If they mention the VetFlow API — theirs is an add-on on Clinic and above, and the price is quote-only. Ask which systems they need to connect, then tell them ours is included.",
+          "evidence_ids": ["ev_004", "ev_015"]
+        },
+        {
+          "id": "s_016",
+          "text": "If they say VetFlow is cheaper to start — their floor is five users and it is billed annually. Ask how many seats they actually need across the three sites.",
+          "evidence_ids": ["ev_001", "ev_002", "ev_014"]
+        },
+        {
+          "id": "s_017",
+          "text": "If they bring up patient recall — that is their name for automated reminders and we do the same thing. Do not argue the feature; move to what happens between locations.",
+          "evidence_ids": ["ev_005", "ev_016", "ev_017"]
+        },
+        {
+          "id": "s_018",
+          "text": "If they ask about Antech — say no, it is Q1. Then ask what share of their labs go to Antech versus IDEXX, because their own site says IDEXX in-house at all three sites.",
+          "evidence_ids": ["ev_018", "ev_013"]
+        },
+        {
+          "id": "s_019",
+          "text": "If they worry about switching cost — VetFlow's two-week implementation is staffed and ours is not. Offer to do the migration with them and put a date on it.",
+          "evidence_ids": ["ev_020"]
+        }
+      ]
+    },
+    {
+      "key": "questions",
+      "title": "Discovery questions",
+      "sentences": [
+        {
+          "id": "s_020",
+          "text": "When a client is seen at Kingston and then comes to Rhinebeck, walk me through what your front desk does today.",
+          "evidence_ids": ["ev_009", "ev_012"]
+        },
+        {
+          "id": "s_021",
+          "text": "Of your 14 people, how many actually need to touch the schedule?",
+          "evidence_ids": ["ev_010"]
+        },
+        {
+          "id": "s_022",
+          "text": "You mention online booking is coming soon — what is driving the timeline on that?",
+          "evidence_ids": ["ev_011"]
+        },
+        {
+          "id": "s_023",
+          "text": "Where do your labs go besides IDEXX in-house?",
+          "evidence_ids": ["ev_013"]
+        },
+        {
+          "id": "s_024",
+          "text": "If you have looked at other systems, what stopped you from moving?",
+          "evidence_ids": []
+        },
+        {
+          "id": "s_025",
+          "text": "Who else has to say yes to this besides you?",
+          "evidence_ids": []
+        }
+      ]
+    }
+  ],
+  "price_comparisons": [
+    {
+      "our_tier": "Thicket Multi-Site",
+      "their_tier": "VetFlow Clinic",
+      "normalized_monthly_per_seat_ours": 45,
+      "normalized_monthly_per_seat_theirs": 79,
+      "delta_abs": 34,
+      "delta_pct": 43.04,
+      "cheaper": "ours",
+      "caveat": "VetFlow Clinic is published at $948 per seat per year; normalized to $79.00/seat/month. Assumes a 12-month commitment. VetFlow requires a 5-seat minimum; Thicket has none."
+    },
+    {
+      "our_tier": "Thicket Solo",
+      "their_tier": "VetFlow Practice",
+      "normalized_monthly_per_seat_ours": 29,
+      "normalized_monthly_per_seat_theirs": 49,
+      "delta_abs": 20,
+      "delta_pct": 40.82,
+      "cheaper": "ours",
+      "caveat": "VetFlow Practice is billed annually and requires a 5-seat minimum; Thicket Solo is billed monthly with no minimum. At VetFlow's floor the practice pays for 5 seats whether or not it uses them."
+    },
+    {
+      "our_tier": "Thicket Multi-Site",
+      "their_tier": "VetFlow Enterprise",
+      "normalized_monthly_per_seat_ours": 45,
+      "normalized_monthly_per_seat_theirs": null,
+      "delta_abs": null,
+      "delta_pct": null,
+      "cheaper": "unknown",
+      "caveat": "VetFlow Enterprise is quote-only above 25 users. No published price — do not state a comparison."
+    }
+  ],
+  "feature_matrix": [
+    {
+      "feature": "Multi-location scheduling",
+      "ours": "yes",
+      "theirs": "yes",
+      "matters_to_target": true,
+      "why": "Brookside runs three locations, so this is table stakes rather than a differentiator.",
+      "evidence_ids": ["ev_015", "ev_002", "ev_009"]
+    },
+    {
+      "feature": "Real-time records sync across locations",
+      "ours": "yes",
+      "theirs": "unknown",
+      "matters_to_target": true,
+      "why": "Brookside's own page admits a one-to-two-day transfer delay; VetFlow's pages do not say either way, so we mark unknown rather than claiming they lack it.",
+      "evidence_ids": ["ev_017", "ev_012"]
+    },
+    {
+      "feature": "Automated appointment reminders",
+      "ours": "yes",
+      "theirs": "yes",
+      "matters_to_target": false,
+      "why": "VetFlow calls this patient recall messaging. Same function, different label — not a place to compete.",
+      "evidence_ids": ["ev_016", "ev_005"]
+    },
+    {
+      "feature": "API access",
+      "ours": "yes",
+      "theirs": "partial",
+      "matters_to_target": false,
+      "why": "Included on our Multi-Site tier; a paid add-on for VetFlow on Clinic and above. Nothing on Brookside's site suggests they need it yet.",
+      "evidence_ids": ["ev_015", "ev_004"]
+    },
+    {
+      "feature": "IDEXX integration",
+      "ours": "yes",
+      "theirs": "yes",
+      "matters_to_target": true,
+      "why": "Brookside runs IDEXX in-house at all three locations, so a gap here would end the conversation.",
+      "evidence_ids": ["ev_018", "ev_008", "ev_013"]
+    },
+    {
+      "feature": "Antech integration",
+      "ours": "no",
+      "theirs": "yes",
+      "matters_to_target": true,
+      "why": "Our only clear loss on this card. Their lab mix is unknown, which is why it is a discovery question.",
+      "evidence_ids": ["ev_018", "ev_008"]
+    },
+    {
+      "feature": "Staffed implementation",
+      "ours": "no",
+      "theirs": "yes",
+      "matters_to_target": true,
+      "why": "A 14-person practice switching systems will ask who does the work. VetFlow claims under two weeks.",
+      "evidence_ids": ["ev_020"]
+    },
+    {
+      "feature": "Online client booking",
+      "ours": "yes",
+      "theirs": "unknown",
+      "matters_to_target": true,
+      "why": "Brookside says online booking is coming soon, so they are actively shopping for it.",
+      "evidence_ids": ["ev_011"]
+    }
+  ],
+  "risk_flags": [
+    {
+      "id": "rf_001",
+      "sentence_id": "s_009",
+      "span": "the only scheduling platform built for veterinary practices from the ground up",
+      "category": "absolute_superiority_claim",
+      "severity": "high",
+      "why": "\"The only\" is an absolute claim with no evidence behind it and is the kind of comparative advertising statement that creates real exposure if the call is recorded or forwarded.",
+      "suggested_alternative": "built for veterinary practices rather than adapted from human healthcare scheduling",
+      "status": "pending"
+    },
+    {
+      "id": "rf_002",
+      "sentence_id": "s_011",
+      "span": "VetFlow integrates with Antech natively and we do not",
+      "category": "stale_pricing",
+      "severity": "medium",
+      "why": "This rests on ev_008, fetched 2026-08-02 — more than 30 days old. Integration lists change, and being wrong about a competitor's capability on a live call is worse than hedging.",
+      "suggested_alternative": "last I checked, VetFlow lists a native Antech integration and we do not yet",
+      "status": "pending"
+    },
+    {
+      "id": "rf_003",
+      "sentence_id": "s_004",
+      "span": "a difference of $34 per seat per month, or 43%",
+      "category": "unverified_competitor_claim",
+      "severity": "medium",
+      "why": "The number is correct but stated without its condition. VetFlow's $79 assumes an annual commitment, and quoting the bare percentage invites a correction on the call.",
+      "suggested_alternative": "about $34 per seat per month less, though their published rate assumes an annual commitment",
+      "status": "pending"
+    },
+    {
+      "id": "rf_004",
+      "sentence_id": "s_014",
+      "span": "They claim over 2,400 practices in North America",
+      "category": "unverified_competitor_claim",
+      "severity": "low",
+      "why": "This is VetFlow's own marketing figure with nothing independent behind it. Repeating it as fact lends it credibility we cannot vouch for.",
+      "suggested_alternative": "their site claims over 2,400 practices",
+      "status": "pending"
+    }
+  ],
+  "grounding_issues": [
+    {
+      "sentence_id": "s_009",
+      "issue": "unsourced",
+      "detail": "No evidence_ids. Nothing on any fetched page supports an exclusivity claim about the veterinary scheduling market."
+    },
+    {
+      "sentence_id": "s_024",
+      "issue": "unsourced",
+      "detail": "No evidence_ids. Acceptable for a discovery question, which is a prompt rather than a factual claim, but flagged for visibility."
+    },
+    {
+      "sentence_id": "s_025",
+      "issue": "unsourced",
+      "detail": "No evidence_ids. Generic qualifying question, not derived from the prospect's page."
+    },
+    {
+      "sentence_id": "s_011",
+      "issue": "stale_evidence",
+      "detail": "Rests on ev_008, fetched 2026-08-02 — 48 days old. Competitor integration pages change without notice."
+    },
+    {
+      "sentence_id": "s_004",
+      "issue": "overstated",
+      "detail": "The 43% figure is arithmetically correct but drops the annual-commitment condition carried in the comparison's caveat."
+    }
+  ],
+  "generated_at": "2026-09-19T17:52:00Z",
+  "word_count": 612
+}

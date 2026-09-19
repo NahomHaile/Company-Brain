@@ -46,3 +46,17 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Browser automation artifacts
+.playwright-mcp/
+
+# Design-iteration screenshots dropped at the repo root
+/canvas-v*.png
+/screenshot*.png
+
+# runtime page cache — fixtures are the committed fallback
+/data/cache/
+/data/session.json
+
+# empty stray file, not part of Person A scope
+team-directive.md
