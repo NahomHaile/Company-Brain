@@ -41,6 +41,7 @@ export function BattlecardWorkbench({
       deliverable: cached.deliverable,
       evidence: cached.evidence,
       price_tiers: cached.price_tiers,
+      pages: [],
       source: "cached",
     }),
     [cached],

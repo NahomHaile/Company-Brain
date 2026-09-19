@@ -133,6 +133,35 @@ export function ResultPanel({
           </div>
         ) : null}
 
+        {run.pages.length ? (
+          <>
+            <Separator />
+            <div className="flex flex-col gap-2">
+              <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+                Pages read
+              </p>
+              <ul className="flex flex-col gap-1.5">
+                {run.pages.map((page, i) => (
+                  <li key={page.requested_url ?? i} className="flex flex-wrap items-center gap-2 text-sm">
+                    <span className="font-mono text-xs">{page.source_label}</span>
+                    {page.cached ? (
+                      <HonestyBadge
+                        kind="cached"
+                        suffix={page.fetched_at ? `fetched ${formatClock(page.fetched_at)}` : undefined}
+                      />
+                    ) : null}
+                    {page.ok === false ? (
+                      <span className="text-xs text-destructive">
+                        {page.error ?? "could not be read"}
+                      </span>
+                    ) : null}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </>
+        ) : null}
+
         <Separator />
 
         <div className="flex flex-col gap-2">
@@ -179,6 +208,17 @@ export function ResultPanel({
       </CardContent>
     </Card>
   );
+}
+
+/** Stable across server and client render — an unpinned locale time hydrates differently. */
+function formatClock(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  return d.toLocaleTimeString("en-US", {
+    timeZone: "America/New_York",
+    hour: "numeric",
+    minute: "2-digit",
+  });
 }
 
 function Stat({ value, label, tone }: { value: number; label: string; tone?: "warn" }) {

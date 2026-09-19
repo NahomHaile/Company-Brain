@@ -32,10 +32,12 @@
 
 "use client";
 
+import { z } from "zod";
 import {
   Deliverable,
   Evidence,
   EvidenceArray,
+  PriceComparison,
   PriceTier,
   PriceTierArray,
   Recipe,
@@ -52,11 +54,33 @@ export type StageState = {
 export const initialStages = (): StageState[] =>
   PIPELINE_STAGES.map((s) => ({ id: s.id, status: "pending" as StageStatus }));
 
+/**
+ * What the badges need to know about each page we read.
+ *
+ * Deliberately lenient and display-only — it mirrors the fields the UI reads off
+ * Person A's `PageFetch` rather than restating the contract, so the shell still
+ * compiles against either version of `contracts.ts`. Anything it does not
+ * recognise is ignored rather than failing the run.
+ */
+const PageSummary = z.object({
+  source_label: z.string(),
+  requested_url: z.string().optional(),
+  ok: z.boolean().optional(),
+  cached: z.boolean().optional(),
+  fetched_at: z.string().nullable().optional(),
+  error: z.string().nullable().optional(),
+  error_detail: z.string().nullable().optional(),
+});
+
+export type PageSummary = z.infer<typeof PageSummary>;
+
 /** A finished run — the deliverable plus everything the canvas needs to show provenance. */
 export type RunResult = {
   deliverable: Deliverable;
   evidence: Evidence[];
   price_tiers: PriceTier[];
+  /** Per-page fetch status. Drives the CACHED badge (§4). Empty for a cached run. */
+  pages: PageSummary[];
   source: "live" | "cached";
 };
 
@@ -160,9 +184,53 @@ export async function runPipeline(input: RunInput): Promise<RunResult> {
     throw err;
   }
 
+  const envelope = (ingested ?? {}) as Record<string, unknown>;
+
+  // The ingest route reports a total failure in the body with HTTP 200, so an
+  // `ok` response is not proof of success. Without this check a 401 on the
+  // extraction step sails through as zero evidence and the run fails later at a
+  // stage that was never the problem — which is exactly the silent failure the
+  // honest error state exists to prevent.
+  const fatal = typeof envelope.fatal === "string" ? envelope.fatal.trim() : "";
+  if (fatal) {
+    onStage("fetch", "done");
+    onStage("evidence", "failed");
+    onStage("pricing", "failed");
+    throw new PipelineError(fatal, "evidence", ingestRoute);
+  }
+
+  const pages = Array.isArray(envelope.pages)
+    ? envelope.pages.flatMap((p) => {
+        const parsed = PageSummary.safeParse(p);
+        return parsed.success ? [parsed.data] : [];
+      })
+    : [];
+
   const evidence = EvidenceArray.parse(unwrap(ingested, "evidence"));
-  const rawTiers = ingested && typeof ingested === "object" ? unwrap(ingested, "price_tiers") : [];
+
+  // Drafting on nothing produces a confident, sourceless card — the one output
+  // this product must never hand over.
+  if (evidence.length === 0) {
+    onStage("evidence", "failed");
+    onStage("pricing", "failed");
+    const why = pages.filter((p) => p.ok === false).map((p) => `${p.source_label}: ${p.error ?? "failed"}`);
+    throw new PipelineError(
+      why.length
+        ? `No evidence could be extracted. ${why.join("; ")}`
+        : "No evidence could be extracted from those pages.",
+      "evidence",
+      ingestRoute,
+    );
+  }
+
+  const rawTiers = unwrap(ingested, "price_tiers");
   const price_tiers = PriceTierArray.parse(Array.isArray(rawTiers) ? rawTiers : []);
+
+  // The ingest route already computes price comparisons deterministically. Carry
+  // them forward so a later stage cannot quietly drop them.
+  const fetchComparisons = z
+    .array(PriceComparison)
+    .safeParse(Array.isArray(envelope.price_comparisons) ? envelope.price_comparisons : []);
 
   onStage("fetch", "done");
   onStage("evidence", "done");
@@ -176,6 +244,9 @@ export async function runPipeline(input: RunInput): Promise<RunResult> {
   } catch (err) {
     onStage("ranking", "failed");
     throw err;
+  }
+  if (!analysis.price_comparisons && fetchComparisons.success && fetchComparisons.data.length) {
+    analysis.price_comparisons = fetchComparisons.data;
   }
   onStage("ranking", "done");
 
@@ -211,7 +282,7 @@ export async function runPipeline(input: RunInput): Promise<RunResult> {
   const deliverable = Deliverable.parse(unwrap(audited, "deliverable"));
   onStage("audit", "done");
 
-  return { deliverable, evidence, price_tiers, source: "live" };
+  return { deliverable, evidence, price_tiers, pages, source: "live" };
 }
 
 // ── Handoff to the review canvas ──────────────────────────────────────────────
