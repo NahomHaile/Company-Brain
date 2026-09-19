@@ -1,0 +1,72 @@
+[
+  {
+    "company": "Thicket",
+    "tier_name": "Solo",
+    "price_amount": 29,
+    "price_unit": "per_seat_month",
+    "seat_minimum": null,
+    "included_features": [
+      "single-location scheduling",
+      "automated appointment reminders",
+      "client records",
+      "IDEXX integration"
+    ],
+    "evidence_ids": ["ev_014"]
+  },
+  {
+    "company": "Thicket",
+    "tier_name": "Multi-Site",
+    "price_amount": 45,
+    "price_unit": "per_seat_month",
+    "seat_minimum": null,
+    "included_features": [
+      "multi-location scheduling",
+      "real-time records sync",
+      "automated appointment reminders",
+      "full API access",
+      "IDEXX integration"
+    ],
+    "evidence_ids": ["ev_015", "ev_017"]
+  },
+  {
+    "company": "VetFlow",
+    "tier_name": "Practice",
+    "price_amount": 49,
+    "price_unit": "per_seat_month",
+    "seat_minimum": 5,
+    "included_features": [
+      "single-location scheduling",
+      "patient recall messaging",
+      "client records"
+    ],
+    "evidence_ids": ["ev_001"]
+  },
+  {
+    "company": "VetFlow",
+    "tier_name": "Clinic",
+    "price_amount": 948,
+    "price_unit": "per_seat_year",
+    "seat_minimum": 5,
+    "included_features": [
+      "everything in Practice",
+      "multi-location scheduling",
+      "VetFlow API add-on available",
+      "IDEXX integration",
+      "Antech integration"
+    ],
+    "evidence_ids": ["ev_002", "ev_004", "ev_008"]
+  },
+  {
+    "company": "VetFlow",
+    "tier_name": "Enterprise",
+    "price_amount": null,
+    "price_unit": "unknown",
+    "seat_minimum": 25,
+    "included_features": [
+      "everything in Clinic",
+      "dedicated implementation team",
+      "custom terms"
+    ],
+    "evidence_ids": ["ev_003", "ev_020"]
+  }
+]

@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "fixtures": "npx --yes tsx scripts/validate-fixtures.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.127.0",
