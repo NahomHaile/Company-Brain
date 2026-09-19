@@ -1,0 +1,795 @@
+{
+  "schema": "cadence.cached_run.v1",
+  "_comment": "Person D — §12.5 wifi insurance. Rendered by ?demo=cached with zero API calls. While captured_from_live_run is false the UI shows an extra SYNTHETIC FIXTURE badge alongside CACHED. Replace this file with a real captured run before the demo and flip the flag.",
+  "captured_from_live_run": false,
+  "captured_at": "2026-09-19T13:52:00-04:00",
+  "inputs": {
+    "recipe": "battlecard",
+    "target_url": "https://www.smalldoorvet.com/membership",
+    "competitor_url": "https://www.digitail.com/pricing"
+  },
+  "evidence": [
+    {
+      "id": "ev_001",
+      "recipe_role": "target",
+      "source": "url",
+      "source_label": "smalldoorvet.com/membership",
+      "source_url": "https://www.smalldoorvet.com/membership",
+      "quote": "No more waiting weeks for an appointment. Small Door membership ensures your pet always gets care when they need it. Managing appointments is a breeze through our app.",
+      "summary": "Availability and in-app booking are part of the membership promise",
+      "type": "positioning",
+      "entities": [
+        "Small Door Veterinary"
+      ],
+      "confidence": 0.95,
+      "fetched_at": "2026-09-19T13:50:00-04:00"
+    },
+    {
+      "id": "ev_002",
+      "recipe_role": "target",
+      "source": "url",
+      "source_label": "smalldoorvet.com/membership",
+      "source_url": "https://www.smalldoorvet.com/membership",
+      "quote": "While other vets try to squeeze in as many appointments as possible, we never overbook to ensure that our doctors have the time to get to know you and your pet.",
+      "summary": "They publicly promise never to overbook",
+      "type": "positioning",
+      "entities": [
+        "Small Door Veterinary"
+      ],
+      "confidence": 0.95,
+      "fetched_at": "2026-09-19T13:50:00-04:00"
+    },
+    {
+      "id": "ev_003",
+      "recipe_role": "target",
+      "source": "url",
+      "source_label": "smalldoorvet.com/membership",
+      "source_url": "https://www.smalldoorvet.com/membership",
+      "quote": "Appointments start on time",
+      "summary": "On-time starts are listed as a standard of care",
+      "type": "proof_point",
+      "entities": [
+        "Small Door Veterinary"
+      ],
+      "confidence": 0.9,
+      "fetched_at": "2026-09-19T13:50:00-04:00"
+    },
+    {
+      "id": "ev_004",
+      "recipe_role": "target",
+      "source": "url",
+      "source_label": "smalldoorvet.com/membership (site navigation)",
+      "source_url": "https://www.smalldoorvet.com/membership",
+      "quote": "Locations Boston Brookline Burlington Cambridge Newton Centre New York City Gramercy Park Slope Upper East Side Upper West Side West Village Williamsburg Washington, DC 14th St Bethesda McLean Navy Yard Spring Valley",
+      "summary": "Sixteen named locations across three metros",
+      "type": "segment",
+      "entities": [
+        "Small Door Veterinary",
+        "Boston",
+        "New York City",
+        "Washington, DC"
+      ],
+      "confidence": 0.9,
+      "fetched_at": "2026-09-19T13:50:00-04:00"
+    },
+    {
+      "id": "ev_005",
+      "recipe_role": "target",
+      "source": "url",
+      "source_label": "smalldoorvet.com/membership",
+      "source_url": "https://www.smalldoorvet.com/membership",
+      "quote": "Membership is $149 per pet per year and includes a free exam every year, reduced exam fees, 24/7 telehealth, and priority appointments. If you want to try us out without the commitment, you can Pay As You Go for $135/exam.",
+      "summary": "Their own consumer pricing is published to the dollar",
+      "type": "pricing",
+      "entities": [
+        "Small Door Veterinary"
+      ],
+      "confidence": 0.95,
+      "fetched_at": "2026-09-19T13:50:00-04:00"
+    },
+    {
+      "id": "ev_006",
+      "recipe_role": "target",
+      "source": "url",
+      "source_label": "smalldoorvet.com/membership (testimonial)",
+      "source_url": "https://www.smalldoorvet.com/membership",
+      "quote": "Small Door boasts extremely attentive and helpful doctors and staff, convenient communication and scheduling (including via their own app), easy billing with email receipts, and- my personal favorite- very transparent pricing.",
+      "summary": "Members book through Small Door's own app and say so unprompted",
+      "type": "proof_point",
+      "entities": [
+        "Small Door Veterinary"
+      ],
+      "confidence": 0.85,
+      "fetched_at": "2026-09-19T13:50:00-04:00"
+    },
+    {
+      "id": "ev_007",
+      "recipe_role": "target",
+      "source": "url",
+      "source_label": "smalldoorvet.com/membership",
+      "source_url": "https://www.smalldoorvet.com/membership",
+      "quote": "No Surprise Bills. Ever.",
+      "summary": "Pricing transparency is a stated brand value",
+      "type": "positioning",
+      "entities": [
+        "Small Door Veterinary"
+      ],
+      "confidence": 0.95,
+      "fetched_at": "2026-09-19T13:50:00-04:00"
+    },
+    {
+      "id": "ev_010",
+      "recipe_role": "competitor",
+      "source": "url",
+      "source_label": "digitail.com/pricing",
+      "source_url": "https://www.digitail.com/pricing",
+      "quote": "Flexible plans for every veterinary clinic",
+      "summary": "Four plans listed — Mobile, Growth, Growth AI, Enterprise — with no published price on any of them",
+      "type": "pricing",
+      "entities": [
+        "Digitail"
+      ],
+      "confidence": 0.9,
+      "fetched_at": "2026-09-19T13:50:00-04:00"
+    },
+    {
+      "id": "ev_011",
+      "recipe_role": "competitor",
+      "source": "url",
+      "source_label": "digitail.com/pricing (FAQ)",
+      "source_url": "https://www.digitail.com/pricing",
+      "quote": "We're the only all-in-one, cloud-based, AI-native practice management system that brings scheduling, forms, client communication, documentation, reporting, invoicing, a pet parent app, VoIP, loyalty, wellness plans, and more into a single platform.",
+      "summary": "Their positioning is full-stack replacement, stated as an exclusivity claim",
+      "type": "positioning",
+      "entities": [
+        "Digitail"
+      ],
+      "confidence": 0.95,
+      "fetched_at": "2026-09-19T13:50:00-04:00"
+    },
+    {
+      "id": "ev_012",
+      "recipe_role": "competitor",
+      "source": "url",
+      "source_label": "digitail.com/pricing (FAQ)",
+      "source_url": "https://www.digitail.com/pricing",
+      "quote": "Digitail reduces manual work like intake, charting, reminders, and follow-ups. This allows veterinary teams to save 50+ hours of admin each month to focus on patient care.",
+      "summary": "Their headline time-savings claim, unaudited",
+      "type": "proof_point",
+      "entities": [
+        "Digitail"
+      ],
+      "confidence": 0.8,
+      "fetched_at": "2026-09-19T13:50:00-04:00"
+    },
+    {
+      "id": "ev_013",
+      "recipe_role": "competitor",
+      "source": "url",
+      "source_label": "digitail.com/pricing (FAQ)",
+      "source_url": "https://www.digitail.com/pricing",
+      "quote": "Digitail supports unlimited staff roles at no additional cost.",
+      "summary": "No per-seat charge — a real advantage at multi-site headcount",
+      "type": "pricing",
+      "entities": [
+        "Digitail"
+      ],
+      "confidence": 0.9,
+      "fetched_at": "2026-09-19T13:50:00-04:00"
+    },
+    {
+      "id": "ev_014",
+      "recipe_role": "competitor",
+      "source": "url",
+      "source_label": "digitail.com/pricing (FAQ)",
+      "source_url": "https://www.digitail.com/pricing",
+      "quote": "Digitail integrates with 40+ common veterinary labs and vendors, allowing new clinics to connect tools as needed.",
+      "summary": "Forty-plus lab and vendor integrations",
+      "type": "integration",
+      "entities": [
+        "Digitail"
+      ],
+      "confidence": 0.9,
+      "fetched_at": "2026-09-19T13:50:00-04:00"
+    },
+    {
+      "id": "ev_015",
+      "recipe_role": "competitor",
+      "source": "url",
+      "source_label": "digitail.com/pricing (FAQ)",
+      "source_url": "https://www.digitail.com/pricing",
+      "quote": "Most clinics go live in weeks—not months—with a structured, expert-led setup.",
+      "summary": "Implementation measured in weeks",
+      "type": "feature",
+      "entities": [
+        "Digitail"
+      ],
+      "confidence": 0.85,
+      "fetched_at": "2026-09-19T13:50:00-04:00"
+    },
+    {
+      "id": "ev_016",
+      "recipe_role": "competitor",
+      "source": "url",
+      "source_label": "digitail.com/pricing (FAQ)",
+      "source_url": "https://www.digitail.com/pricing",
+      "quote": "Digitail eliminates the need to buy and manage multiple disconnected tools.",
+      "summary": "They sell consolidation — which frames point tools like ours as clutter",
+      "type": "positioning",
+      "entities": [
+        "Digitail"
+      ],
+      "confidence": 0.9,
+      "fetched_at": "2026-09-19T13:50:00-04:00"
+    },
+    {
+      "id": "ev_017",
+      "recipe_role": "competitor",
+      "source": "url",
+      "source_label": "digitail.com/pricing (plan comparison table)",
+      "source_url": "https://www.digitail.com/pricing",
+      "quote": "Calendar with Customizable Views Complex Schedule Templates",
+      "summary": "Scheduling depth ships in the Growth tier and above",
+      "type": "feature",
+      "entities": [
+        "Digitail"
+      ],
+      "confidence": 0.85,
+      "fetched_at": "2026-09-19T13:50:00-04:00"
+    },
+    {
+      "id": "ev_018",
+      "recipe_role": "competitor",
+      "source": "url",
+      "source_label": "digitail.com/pricing (plan comparison table)",
+      "source_url": "https://www.digitail.com/pricing",
+      "quote": "Online Appointment Booking Appointment Rescheduling / Cancellation Unlimited Appointment Reminders",
+      "summary": "Online booking, rescheduling and unlimited reminders are included",
+      "type": "feature",
+      "entities": [
+        "Digitail"
+      ],
+      "confidence": 0.9,
+      "fetched_at": "2026-09-19T13:50:00-04:00"
+    },
+    {
+      "id": "ev_019",
+      "recipe_role": "competitor",
+      "source": "url",
+      "source_label": "digitail.com/pricing (cached copy, 2 Aug 2026)",
+      "source_url": "https://www.digitail.com/pricing",
+      "quote": "Integrated Phone System ( VoIP ) Add-on ... SMS, MMS, 2-way, and Mass Texting Add-on",
+      "summary": "VoIP and mass texting are add-ons rather than plan inclusions — from a cached fetch, not today's",
+      "type": "pricing",
+      "entities": [
+        "Digitail"
+      ],
+      "confidence": 0.6,
+      "fetched_at": "2026-08-02T14:12:00-04:00"
+    },
+    {
+      "id": "ev_030",
+      "recipe_role": "own",
+      "source": "interview",
+      "source_label": "Thicket internal pricing sheet (synthetic)",
+      "source_url": null,
+      "quote": "Thicket Practice is $18 per seat per month, billed monthly, with a three-seat minimum and no setup fee.",
+      "summary": "Our published per-seat price and seat floor",
+      "type": "pricing",
+      "entities": [
+        "Thicket"
+      ],
+      "confidence": 1,
+      "fetched_at": "2026-09-19T13:50:00-04:00"
+    },
+    {
+      "id": "ev_031",
+      "recipe_role": "own",
+      "source": "interview",
+      "source_label": "Thicket product notes (synthetic)",
+      "source_url": null,
+      "quote": "Thicket connects to Digitail, ezyVet and Cornerstone; bookings write back to the practice's own calendar within 60 seconds.",
+      "summary": "We sit alongside the PIMS rather than replacing it",
+      "type": "integration",
+      "entities": [
+        "Thicket",
+        "Digitail",
+        "ezyVet",
+        "Cornerstone"
+      ],
+      "confidence": 1,
+      "fetched_at": "2026-09-19T13:50:00-04:00"
+    },
+    {
+      "id": "ev_032",
+      "recipe_role": "own",
+      "source": "interview",
+      "source_label": "Thicket onboarding log (synthetic)",
+      "source_url": null,
+      "quote": "Median go-live for a four-location practice is nine days.",
+      "summary": "Our implementation benchmark",
+      "type": "proof_point",
+      "entities": [
+        "Thicket"
+      ],
+      "confidence": 0.9,
+      "fetched_at": "2026-09-19T13:50:00-04:00"
+    },
+    {
+      "id": "ev_033",
+      "recipe_role": "own",
+      "source": "interview",
+      "source_label": "Thicket product notes (synthetic)",
+      "source_url": null,
+      "quote": "Thicket does not do medical records, invoicing or inventory — it is scheduling and client communication only.",
+      "summary": "Our scope limit, stated plainly",
+      "type": "loss",
+      "entities": [
+        "Thicket"
+      ],
+      "confidence": 1,
+      "fetched_at": "2026-09-19T13:50:00-04:00"
+    }
+  ],
+  "price_tiers": [
+    {
+      "company": "Thicket",
+      "tier_name": "Thicket Practice",
+      "price_amount": 18,
+      "price_unit": "per_seat_month",
+      "seat_minimum": 3,
+      "included_features": [
+        "Online booking",
+        "Two-way SMS",
+        "PIMS write-back",
+        "Multi-location templates"
+      ],
+      "evidence_ids": [
+        "ev_030",
+        "ev_031"
+      ]
+    },
+    {
+      "company": "Digitail",
+      "tier_name": "Growth",
+      "price_amount": null,
+      "price_unit": "unknown",
+      "seat_minimum": null,
+      "included_features": [
+        "Calendar with customizable views",
+        "Complex schedule templates",
+        "Online appointment booking",
+        "Unlimited appointment reminders",
+        "Unlimited staff users"
+      ],
+      "evidence_ids": [
+        "ev_010",
+        "ev_013",
+        "ev_017",
+        "ev_018"
+      ]
+    },
+    {
+      "company": "Digitail",
+      "tier_name": "Enterprise",
+      "price_amount": null,
+      "price_unit": "unknown",
+      "seat_minimum": null,
+      "included_features": [
+        "Everything in Growth AI",
+        "Multi-location scalability and control",
+        "Enterprise reporting"
+      ],
+      "evidence_ids": [
+        "ev_010"
+      ]
+    }
+  ],
+  "deliverable": {
+    "recipe": "battlecard",
+    "title": "Battlecard — Small Door Veterinary",
+    "subject_label": "Thicket vs. Digitail — for Small Door Veterinary",
+    "generated_at": "2026-09-19T13:52:00-04:00",
+    "word_count": 603,
+    "sections": [
+      {
+        "key": "positioning",
+        "title": "Positioning",
+        "sentences": [
+          {
+            "id": "s_pos_1",
+            "text": "Small Door runs sixteen clinics across Boston, New York and Washington DC, and its public promise is availability — same or next-day appointments, and exams that start on time.",
+            "evidence_ids": [
+              "ev_004",
+              "ev_001",
+              "ev_003"
+            ]
+          },
+          {
+            "id": "s_pos_2",
+            "text": "That makes scheduling a marketing problem for them rather than an IT problem, and it is the frame to open with.",
+            "evidence_ids": [
+              "ev_002",
+              "ev_001"
+            ]
+          },
+          {
+            "id": "s_pos_3",
+            "text": "Digitail sells the opposite motion: replace the whole practice-management stack with one AI-native platform.",
+            "evidence_ids": [
+              "ev_011",
+              "ev_016"
+            ]
+          },
+          {
+            "id": "s_pos_4",
+            "text": "Thicket's line here is that we make the calendar they already have work harder — not that they should rip out their PIMS.",
+            "evidence_ids": [
+              "ev_031",
+              "ev_033"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "pricing",
+        "title": "Pricing",
+        "sentences": [
+          {
+            "id": "s_pri_1",
+            "text": "Thicket Practice is $18 per seat per month with a three-seat minimum; Digitail publishes no price at all — every plan on their pricing page routes to a demo or to sales.",
+            "evidence_ids": [
+              "ev_030",
+              "ev_010"
+            ]
+          },
+          {
+            "id": "s_pri_2",
+            "text": "Their integrated phone system and mass texting are listed as add-ons rather than included in a plan.",
+            "evidence_ids": [
+              "ev_019"
+            ]
+          },
+          {
+            "id": "s_pri_3",
+            "text": "Do not claim to be cheaper. We have no number for their plan, and a confident wrong number on a live call is how this deal is lost.",
+            "evidence_ids": [
+              "ev_010"
+            ]
+          },
+          {
+            "id": "s_pri_4",
+            "text": "Digitail does include unlimited staff users at no additional cost, which is a genuine advantage over per-seat pricing once a practice has sixteen front desks.",
+            "evidence_ids": [
+              "ev_013",
+              "ev_030",
+              "ev_004"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "we_win",
+        "title": "Where we win",
+        "sentences": [
+          {
+            "id": "s_win_1",
+            "text": "Thicket writes bookings back to Digitail, ezyVet and Cornerstone within sixty seconds, so a practice keeps the system its staff already trained on.",
+            "evidence_ids": [
+              "ev_031"
+            ]
+          },
+          {
+            "id": "s_win_2",
+            "text": "Our median go-live for a four-location practice is nine days; Digitail's own page says most clinics go live in weeks, not months.",
+            "evidence_ids": [
+              "ev_032",
+              "ev_015"
+            ]
+          },
+          {
+            "id": "s_win_3",
+            "text": "Our pricing is published and theirs is not — and for a practice that markets No Surprise Bills. Ever. to its own clients, that contrast is worth naming out loud.",
+            "evidence_ids": [
+              "ev_007",
+              "ev_010",
+              "ev_030"
+            ]
+          },
+          {
+            "id": "s_win_4",
+            "text": "Thicket is the only scheduling tool that writes back to all three major veterinary PIMS.",
+            "evidence_ids": [
+              "ev_031"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "they_win",
+        "title": "Where they win — landmines",
+        "sentences": [
+          {
+            "id": "s_they_1",
+            "text": "Digitail is an all-in-one practice management system. Thicket does scheduling and client communication only — no medical records, no invoicing, no inventory.",
+            "evidence_ids": [
+              "ev_033",
+              "ev_016"
+            ]
+          },
+          {
+            "id": "s_they_2",
+            "text": "If Small Door is already unhappy with its current PIMS, Digitail's consolidation pitch is stronger than ours and this is not the ground to fight on.",
+            "evidence_ids": [
+              "ev_016",
+              "ev_011"
+            ]
+          },
+          {
+            "id": "s_they_3",
+            "text": "They include unlimited staff users at no additional cost, so per-seat pricing is our weakest point on an account with sixteen locations of front-desk staff.",
+            "evidence_ids": [
+              "ev_013",
+              "ev_004"
+            ]
+          },
+          {
+            "id": "s_they_4",
+            "text": "Their AI scribe is unreliable in exam rooms.",
+            "evidence_ids": []
+          }
+        ]
+      },
+      {
+        "key": "pivots",
+        "title": "Pivot points — what to say when they bring it up",
+        "sentences": [
+          {
+            "id": "s_piv_1",
+            "text": "If they say they are evaluating Digitail, agree first: if they want one system for records, invoicing and scheduling, Digitail is a serious option. Then move the question to what sixteen front desks would have to be retrained on.",
+            "evidence_ids": [
+              "ev_016",
+              "ev_004"
+            ]
+          },
+          {
+            "id": "s_piv_2",
+            "text": "If they say Digitail includes unlimited users, concede it plainly, then ask how many of those seats actually touch the calendar.",
+            "evidence_ids": [
+              "ev_013"
+            ]
+          },
+          {
+            "id": "s_piv_3",
+            "text": "If they say they already have their own app, that is the strongest objection on this account — their members book in it and reviews name it — so position Thicket behind that app rather than in front of it.",
+            "evidence_ids": [
+              "ev_006",
+              "ev_001"
+            ]
+          },
+          {
+            "id": "s_piv_4",
+            "text": "If they ask what Digitail costs, say you do not know, because Digitail does not publish it. Refusing to guess is worth more than a number you cannot defend.",
+            "evidence_ids": [
+              "ev_010"
+            ]
+          },
+          {
+            "id": "s_piv_5",
+            "text": "If they say they never overbook, that is their published promise, so the pitch is protecting that promise across sixteen sites rather than filling more slots.",
+            "evidence_ids": [
+              "ev_002",
+              "ev_004"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "questions",
+        "title": "Discovery questions",
+        "sentences": [
+          {
+            "id": "s_q_1",
+            "text": "Across your locations, who owns the appointment template — each clinic, or one person centrally?",
+            "evidence_ids": [
+              "ev_004"
+            ]
+          },
+          {
+            "id": "s_q_2",
+            "text": "Your site promises same or next-day appointments. How often do you actually hit that, and where does it break down?",
+            "evidence_ids": [
+              "ev_001"
+            ]
+          },
+          {
+            "id": "s_q_3",
+            "text": "You promise that appointments start on time. Do you measure it, and what does it look like on a bad Monday?",
+            "evidence_ids": [
+              "ev_003"
+            ]
+          },
+          {
+            "id": "s_q_4",
+            "text": "If you moved to a single all-in-one system, what would your team have to give up that they currently like?",
+            "evidence_ids": [
+              "ev_016"
+            ]
+          },
+          {
+            "id": "s_q_5",
+            "text": "Members book through your app. What happens today when someone calls instead?",
+            "evidence_ids": [
+              "ev_006"
+            ]
+          }
+        ]
+      }
+    ],
+    "price_comparisons": [
+      {
+        "our_tier": "Thicket Practice",
+        "their_tier": "Digitail Growth",
+        "normalized_monthly_per_seat_ours": 18,
+        "normalized_monthly_per_seat_theirs": null,
+        "delta_abs": null,
+        "delta_pct": null,
+        "cheaper": "unknown",
+        "caveat": "Digitail publishes no price for Growth — the plan routes to a demo. No per-seat comparison is possible without guessing."
+      },
+      {
+        "our_tier": "Thicket Practice",
+        "their_tier": "Digitail Enterprise",
+        "normalized_monthly_per_seat_ours": 18,
+        "normalized_monthly_per_seat_theirs": null,
+        "delta_abs": null,
+        "delta_pct": null,
+        "cheaper": "unknown",
+        "caveat": "Enterprise is quote-only (\"Talk to sales\"). Their unlimited-user model also means per-seat is the wrong unit for comparison."
+      }
+    ],
+    "feature_matrix": [
+      {
+        "feature": "Online appointment booking",
+        "ours": "yes",
+        "theirs": "yes",
+        "matters_to_target": true,
+        "why": "Small Door's brand promise is same or next-day availability, so booking is table stakes on this account rather than a differentiator.",
+        "evidence_ids": [
+          "ev_018",
+          "ev_001"
+        ]
+      },
+      {
+        "feature": "Two-way SMS with clients",
+        "ours": "yes",
+        "theirs": "partial",
+        "matters_to_target": true,
+        "why": "Their comparison table lists SMS, MMS, two-way and mass texting as an add-on rather than a plan inclusion.",
+        "evidence_ids": [
+          "ev_019"
+        ]
+      },
+      {
+        "feature": "Integrated phone system (VoIP)",
+        "ours": "no",
+        "theirs": "partial",
+        "matters_to_target": false,
+        "why": "Listed on their page as an add-on. We do not offer it at all; unlikely to decide this deal.",
+        "evidence_ids": [
+          "ev_019"
+        ]
+      },
+      {
+        "feature": "Medical records and SOAP charting",
+        "ours": "no",
+        "theirs": "yes",
+        "matters_to_target": true,
+        "why": "Core to their all-in-one pitch and entirely outside our scope. Concede it early.",
+        "evidence_ids": [
+          "ev_033",
+          "ev_016"
+        ]
+      },
+      {
+        "feature": "Unlimited staff users at no extra cost",
+        "ours": "no",
+        "theirs": "yes",
+        "matters_to_target": true,
+        "why": "We charge per seat with a three-seat minimum. At sixteen locations this is our weakest commercial point.",
+        "evidence_ids": [
+          "ev_013",
+          "ev_030"
+        ]
+      },
+      {
+        "feature": "Works alongside an existing PIMS",
+        "ours": "yes",
+        "theirs": "no",
+        "matters_to_target": true,
+        "why": "Their stated value is eliminating multiple disconnected tools, which means replacing the incumbent rather than sitting next to it.",
+        "evidence_ids": [
+          "ev_031",
+          "ev_016"
+        ]
+      },
+      {
+        "feature": "Published pricing",
+        "ours": "yes",
+        "theirs": "no",
+        "matters_to_target": true,
+        "why": "Small Door markets its own pricing transparency to pet owners, so an unquotable vendor is a values mismatch worth naming.",
+        "evidence_ids": [
+          "ev_030",
+          "ev_010",
+          "ev_007"
+        ]
+      },
+      {
+        "feature": "Multi-location schedule and room templates",
+        "ours": "partial",
+        "theirs": "yes",
+        "matters_to_target": true,
+        "why": "Complex schedule templates and room management ship in their Growth tier; ours are per-location and need central overrides.",
+        "evidence_ids": [
+          "ev_017"
+        ]
+      },
+      {
+        "feature": "No-show risk scoring on an appointment",
+        "ours": "yes",
+        "theirs": "unknown",
+        "matters_to_target": true,
+        "why": "Nothing on their public pricing page mentions it. We say unknown rather than no — do not claim they lack it.",
+        "evidence_ids": [
+          "ev_017",
+          "ev_018"
+        ]
+      }
+    ],
+    "risk_flags": [
+      {
+        "id": "rf_001",
+        "sentence_id": "s_win_4",
+        "span": "the only scheduling tool",
+        "category": "absolute_superiority_claim",
+        "severity": "high",
+        "why": "An exclusivity claim about a whole market is comparative advertising. We have not surveyed every scheduling vendor, and one counterexample on a live call destroys the rest of the card.",
+        "suggested_alternative": "Thicket is one of the few scheduling tools that writes back to all three major veterinary PIMS.",
+        "status": "pending"
+      },
+      {
+        "id": "rf_002",
+        "sentence_id": "s_they_4",
+        "span": "unreliable in exam rooms",
+        "category": "disparagement",
+        "severity": "high",
+        "why": "A negative performance claim about a named competitor's product with no source behind it. This is the sentence most likely to be repeated on a call and the least defensible.",
+        "suggested_alternative": "We have not seen independent benchmarks for their AI scribe — worth asking how it performs on your case mix.",
+        "status": "pending"
+      },
+      {
+        "id": "rf_003",
+        "sentence_id": "s_pri_2",
+        "span": "listed as add-ons",
+        "category": "stale_pricing",
+        "severity": "medium",
+        "why": "The only evidence for this is a cached fetch from 2 August 2026. Their pricing page has changed since we started tracking it, and add-on status is exactly the kind of thing that moves.",
+        "suggested_alternative": "As of our last check in August, their phone system and mass texting were add-ons rather than plan inclusions — worth confirming with them directly.",
+        "status": "pending"
+      }
+    ],
+    "grounding_issues": [
+      {
+        "sentence_id": "s_they_4",
+        "issue": "unsourced",
+        "detail": "No evidence attached. Nothing on either fetched page supports this. Redact it or find a source before the call."
+      },
+      {
+        "sentence_id": "s_pri_2",
+        "issue": "stale_evidence",
+        "detail": "Backed only by ev_019, fetched 2 August 2026 — forty-eight days before this card. Re-fetch digitail.com/pricing before citing it."
+      }
+    ]
+  }
+}
