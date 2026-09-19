@@ -78,14 +78,22 @@ X must be something this prospect would plausibly say out loud on the call — a
 
 Y must be short enough to say out loud from memory, without reading it off a screen. One or two sentences. It must be grounded in the evidence and never invented. Where it helps, end Y with a question that hands the conversation back to them.
 
-Write speech, not marketing copy. The test: could a person say this sentence to another person without sounding like a brochure?
+FORMAT, and this is not negotiable: each pivot reads
 
-Bad: "Emphasize our superior integration ecosystem and seamless onboarding experience."
-Good: "If they mention VetFlow's API — theirs is add-on-only above the Pro tier. Ask which systems they need to connect, then show them ours is included at every tier."
+  When they say "<what they say>", you say: "<what you say back>"
 
-The bad one is a stage direction. The good one is a thing you say, and it ends by asking them something.
+Both halves are in quotes, because both are things a person says out loud.
 
-Write 4 to 6 pivots, each as one sentence object containing the full "When they say X, you say Y" text.
+The Y half must never be a stage direction. If it starts with a verb telling the founder what to do — "point out that...", "ask about...", "acknowledge...", "emphasize...", "highlight...", "mention..." — it is wrong, and the whole pivot has to be rewritten as the actual words. The founder is reading this 30 seconds before a call. They need the line, not directions for producing the line.
+
+Bad: "When they say VetFlow has an API, point out that theirs is add-on-only and ask which systems they need to connect."
+Good: When they say "VetFlow already has an API", you say: "Theirs is an add-on above the Pro tier. Which systems are you trying to connect? Ours is included on every plan."
+
+The bad one describes a move. The good one is the move.
+
+Keep the Y half under about 35 words. Anything longer cannot be said from memory, which defeats the purpose.
+
+Write 4 to 6 pivots, each as one sentence object containing the complete pivot text.
 
 ${sectionTail()}`;
 
@@ -145,11 +153,24 @@ export const BATTLECARD: RecipeDefinition<BattlecardContext> = {
   prepare(input: RecipeInput): Record<BattlecardContext, string> {
     const header = `Prospect and competitor: ${input.subjectLabel}`;
 
+    // `id` is stripped deliberately. A live run had the model citing
+    // "diff_001" as an evidence id because it saw the field and assumed it was
+    // citable. Drafting never needs to reference a differentiator by id, so
+    // removing it kills the confusion at the source rather than instructing
+    // around it.
+    const differentiators = (input.differentiators ?? []).map((d) => ({
+      claim: d.claim,
+      direction: d.direction,
+      materiality: d.materiality,
+      materiality_reason: d.materiality_reason,
+      evidence_ids: d.evidence_ids,
+    }));
+
     const analysis = [
       header,
       "",
       "Ranked differentiators:",
-      JSON.stringify(input.differentiators ?? [], null, 2),
+      JSON.stringify(differentiators, null, 2),
       "",
       "Feature comparison:",
       JSON.stringify(input.featureMatrix ?? [], null, 2),

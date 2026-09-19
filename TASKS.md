@@ -43,27 +43,29 @@ Only edit **your own** person's section, plus the shared gates at the top.
 
 **Work against A's fixtures. Do not wait for live routes.**
 
-> On branch `person-b/analysis-drafting` (4 commits). Everything below typechecks,
-> lints, passes `next build`, and passes 127 automated spec checks
-> (`npx tsx src/lib/prompts/_dev/verify-b.ts`).
+> On branch `person-b/analysis-drafting`. **Verified live against Anthropic:
+> 26/26 live checks and 130/130 static checks pass, clean run, zero warnings.**
+> tsc, eslint and `next build` all green.
 >
-> **Still not verified live.** The battlecard pipeline ran end-to-end once and
-> passed 24/26 live checks, but that was against a different provider during a
-> brief detour. On Anthropic it has **never run**: the supplied key is
-> organization-scoped with `workspace_id: null` and the org has no workspaces, so
-> inference is rejected. Waiting on a workspace-scoped key. Hence `[~]`, not `[x]`.
+> Live suite: `npx tsx src/lib/prompts/_dev/verify-live.ts` (~9 API calls).
+> Static suite: `npx tsx src/lib/prompts/_dev/verify-b.ts` (no key needed).
 >
-> Temporary shim in `src/lib/prompts/_dev/` — deleted the moment A lands the real
-> client. `npx tsx src/lib/prompts/_dev/verify-live.ts` runs the live suite.
+> **⚠ LATENCY — D please read.** A clean run takes **94s** for /api/draft
+> (fan-out 14s, assembly 80s) and **44s** for /api/analyze. maxDuration is now
+> 300s and 120s. Vercel Hobby caps functions well below 300s — if the cap
+> cannot be raised, the demo must go through §12.5's cached path.
+>
+> Temporary shim in `src/lib/prompts/_dev/` — deleted the moment A lands the
+> real client.
 
 - [~] B1 feature matrix → `FeatureRow[]`
 - [~] B2 differentiator ranker → `Differentiator[]`
 - [~] B3 positioning → `Section`
 - [~] B5 pivot points → `Section` *(the differentiator — give it your best hour)*
 - [~] B6 landmines / where they win → `Section`
-- [!] B4 pricing narrative → `Section` — prompt written and passing; **blocked on A's
-      `pricing.ts`** for real `PriceComparison[]`. The hand-written table it is tested
-      against is **not demo-safe**.
+- [!] B4 pricing narrative → `Section` — **verified live: states no number absent
+      from the table.** Still **blocked on A's `pricing.ts`** for real
+      `PriceComparison[]`; the hand-written table it runs against is not demo-safe.
 - [~] B7 discovery questions → `Section`
 - [~] B9 assembly → `Deliverable` — evidence_id preservation is now **enforced in
       code**, not just asked for in the prompt; on violation we keep the unassembled draft

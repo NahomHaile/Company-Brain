@@ -238,11 +238,23 @@ async function draftSection(
 }
 
 async function assemble(sections: Section[]): Promise<Section[]> {
+  // Telling it the current count and the cut required is far more effective
+  // than the target alone. A live run came back at 813 words against a 550
+  // ceiling because "target 350 to 550" gave it nothing to measure against.
+  const current = countWords(sections);
+  const instruction =
+    current > WORD_TARGET.max
+      ? `The draft below is ${current} words. That is ${current - WORD_TARGET.max} over the ceiling. Cut it to between ${WORD_TARGET.min} and ${WORD_TARGET.max} words. This is the main thing you are being asked to do.`
+      : `The draft below is ${current} words, already within the ${WORD_TARGET.min}-${WORD_TARGET.max} target. Do not pad it.`;
+
   return callClaude({
     system: ASSEMBLY_SYSTEM,
-    user: JSON.stringify(sections, null, 2),
+    user: `${instruction}\n\n${JSON.stringify(sections, null, 2)}`,
     schema: SectionArray,
     maxTokens: 16000,
+    // Assembly rewrites the whole document. Sonnet timed out at 30s on a live
+    // run and fell through to Haiku, which took 108s and tightened poorly.
+    timeoutMs: 120_000,
   });
 }
 

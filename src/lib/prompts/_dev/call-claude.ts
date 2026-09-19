@@ -55,6 +55,16 @@ export const PRIMARY_MODEL = MODEL_CHAIN[0];
 /** A hung call must not eat the fan-out and push the route past maxDuration. */
 const REQUEST_TIMEOUT_MS = 30_000;
 
+/**
+ * Above this, switch to streaming and give the call more room.
+ *
+ * A live run had assembly (max_tokens 16000) time out on Sonnet at 30s and fall
+ * through to Haiku, which then took 108s and did not tighten properly. Long
+ * generations need streaming to avoid HTTP timeouts — the SDK requires it for
+ * large max_tokens for exactly this reason.
+ */
+const STREAMING_THRESHOLD_TOKENS = 8192;
+
 const RETRY_NUDGE =
   "Your previous response was not valid JSON. Return only the JSON object.";
 
@@ -73,7 +83,6 @@ function getClient(): Anthropic {
     const workspaceId = process.env.ANTHROPIC_WORKSPACE_ID;
     client = new Anthropic({
       maxRetries: 2, // SDK handles 429/5xx/connection errors itself
-      timeout: REQUEST_TIMEOUT_MS,
       ...(workspaceId
         ? { defaultHeaders: { "anthropic-workspace-id": workspaceId } }
         : {}),
@@ -110,17 +119,28 @@ async function generate(
   system: string,
   messages: Anthropic.MessageParam[],
   maxTokens: number,
+  timeoutMs: number,
 ): Promise<string> {
   let lastError: unknown = new Error("no attempt was made");
 
+  // Long generations stream: a buffered request with a large max_tokens hits
+  // the HTTP timeout before the model finishes.
+  const stream = maxTokens > STREAMING_THRESHOLD_TOKENS;
+
   for (const model of MODEL_CHAIN) {
     try {
-      const response = await getClient().messages.create({
+      const request = {
         model,
         max_tokens: maxTokens,
         system,
         messages,
-      });
+      } as const;
+
+      const response = stream
+        ? await getClient()
+            .messages.stream(request, { timeout: timeoutMs })
+            .finalMessage()
+        : await getClient().messages.create(request, { timeout: timeoutMs });
 
       // A truncated response is a successful call that yields unparseable JSON.
       // Saying so beats a downstream "Unexpected end of JSON input".
@@ -165,11 +185,19 @@ export async function callClaude<T>(opts: {
   user: string;
   schema: z.ZodType<T>;
   maxTokens?: number;
+  /** Assembly needs more than a section does. Defaults to 30s. */
+  timeoutMs?: number;
 }): Promise<T> {
-  const { system, user, schema, maxTokens = 8192 } = opts;
+  const {
+    system,
+    user,
+    schema,
+    maxTokens = 8192,
+    timeoutMs = REQUEST_TIMEOUT_MS,
+  } = opts;
 
   const messages: Anthropic.MessageParam[] = [{ role: "user", content: user }];
-  const first = await generate(system, messages, maxTokens);
+  const first = await generate(system, messages, maxTokens, timeoutMs);
 
   try {
     return schema.parse(JSON.parse(stripFences(first)));
@@ -183,6 +211,7 @@ export async function callClaude<T>(opts: {
         { role: "user", content: RETRY_NUDGE },
       ],
       maxTokens,
+      timeoutMs,
     );
 
     try {

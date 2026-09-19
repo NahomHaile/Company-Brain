@@ -11,9 +11,9 @@ import { buildFeatureMatrix, rankDifferentiators } from "@/lib/prompts/analyze";
 import { ModelOutputError } from "@/lib/prompts/_dev/call-claude";
 import { SAMPLE_EVIDENCE } from "@/lib/prompts/_dev/sample-evidence";
 
-// The matrix and ranker are two sequential model calls. Vercel's default
-// function timeout will cut that off; the demo needs the headroom.
-export const maxDuration = 60;
+// Two sequential model calls. Measured ~44s live (matrix 18.7s, ranker
+// 24.9s), so 60s left almost no margin.
+export const maxDuration = 120;
 export const runtime = "nodejs";
 
 const RequestBody = z.object({

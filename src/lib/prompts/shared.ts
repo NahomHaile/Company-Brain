@@ -19,7 +19,11 @@ export const JSON_ONLY =
  * Provenance is the product. A sentence with no evidence behind it is a
  * grounding flag, not a default (§3.2).
  */
-export const CITATION_RULE = `Every sentence carries "evidence_ids": the ids of the evidence items it rests on. Cite the specific items you actually used, not every id you were shown. If a sentence genuinely rests on no evidence, return an empty array rather than inventing a citation — a downstream audit will flag it, which is the correct outcome. Never state a fact that no evidence supports just to fill the section.
+export const CITATION_RULE = `Every sentence carries "evidence_ids": the ids of the evidence items it rests on.
+
+Those ids come ONLY from the Evidence block and always look like "ev_001". Do not cite a differentiator, a feature row, or anything else that happens to have an id — only evidence items are citable. An id that is not in the Evidence block is dropped before the card is rendered, and the sentence ends up looking unsourced.
+
+Cite the specific items you actually used, not every id you were shown. If a sentence genuinely rests on no evidence, return an empty array rather than inventing a citation — a downstream audit will flag it, which is the correct outcome. Never state a fact that no evidence supports just to fill the section.
 
 "id" is a short slug, unique within the section.`;
 

@@ -22,8 +22,14 @@ import {
   SAMPLE_PRICE_COMPARISONS,
 } from "@/lib/prompts/_dev/sample-evidence";
 
-// Parallel section calls plus an assembly pass. Well past Vercel's default.
-export const maxDuration = 90;
+// MEASURED, not guessed: a clean live run took 94.4s (fan-out 14.3s,
+// assembly 80.1s). The previous 90s cap was BELOW the real runtime and would
+// have 504'd on Vercel.
+//
+// D: verify this against the actual Vercel plan. Hobby caps serverless
+// functions well below 300s, and if the cap cannot be raised the route needs
+// to stream progress or the demo must run through §12.5's cached path.
+export const maxDuration = 300;
 export const runtime = "nodejs";
 
 const RequestBody = z.object({

@@ -161,10 +161,27 @@ group("5. B5 pivots — the most valuable prompt (§10.4)");
 
 ok('enforces "when they say X, you say Y"', says(PIVOTS_SYSTEM, "when they say x, you say y"));
 ok("asks for 4 to 6 pivots", says(PIVOTS_SYSTEM, "4 to 6"));
-ok("demands speech, not marketing copy", says(PIVOTS_SYSTEM, "speech, not marketing copy"));
 ok("carries both worked examples", says(PIVOTS_SYSTEM, "bad:") && says(PIVOTS_SYSTEM, "good:"));
 ok("requires Y be sayable from memory", says(PIVOTS_SYSTEM, "without reading"));
 ok("forbids invention", says(PIVOTS_SYSTEM, "never invented"));
+
+// A live run returned "When they say X, point out that..." — good content in
+// the wrong form. "Write speech, not marketing copy" was too soft to hold, so
+// the prompt now bans the specific verbs by name.
+ok(
+  "bans stage-direction verbs explicitly, not just 'write speech'",
+  ["point out", "acknowledge", "emphasize", "highlight", "mention"].every((verb) =>
+    says(PIVOTS_SYSTEM, `"${verb}`),
+  ),
+);
+ok("caps the spoken half so it can be said from memory", says(PIVOTS_SYSTEM, "under about 35 words"));
+ok("requires both halves in quotes as actual speech", says(PIVOTS_SYSTEM, "you say:"));
+
+// The same live run had the model citing "diff_001" as an evidence id.
+ok(
+  "citation rule names the ev_ prefix and rejects differentiator ids",
+  says(POSITIONING_SYSTEM, "ev_001") && says(POSITIONING_SYSTEM, "differentiator"),
+);
 
 // ===========================================================================
 group("6. B6 landmines (§10.5)");
