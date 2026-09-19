@@ -66,31 +66,37 @@ Only edit **your own** person's section, plus the shared gates at the top.
 - [x] `ReviewCanvas.tsx` · [x] `ProvenancePopover.tsx` · [x] `RiskFlag.tsx`
 - [x] Unsourced sentences get a visible warning treatment
 - [x] C1 de-robotify · [x] C2 grounding auditor · [x] C3 risk flagger
-- [x] **Audit pipeline** — C1 → `Promise.all([C2, C3])` → `verifyNumbers`, fully tested
-- [x] **Wired to D's `sessionStorage` handoff** — `/review` renders a live run
+- [x] Audit pipeline — C1 → `Promise.all([C2, C3])` → `verifyNumbers`
+- [x] **`src/app/api/audit/route.ts`** — unblocked by A's merge, registers as `ƒ /api/audit`
 - [x] `src/app/review/page.tsx` · [x] Inline editing on any sentence
-- [~] `src/app/api/audit/route.ts` — ~10-line shim, waiting on A's branch
+- [x] Wired to D's `sessionStorage` handoff (`cadence:run`)
+- [x] Built to the design direction — two columns, highlighter / pencil / stamp annotations
 - [ ] *(stretch)* objection simulator
 
-**C status — 2:47 PM · branch `ryan` · PR #1 · 57 tests, lint, typecheck, build clean.**
+**C is done — 12/12. 3:25 PM · branch `ryan` · PR #1 · 67 tests, lint, typecheck, build all clean.**
 
-**D — I found and fixed our seam.** Your `pipeline-client.ts` writes the run to
-`sessionStorage['cadence:run']` and navigates to `/review`, but the canvas wasn't
-reading it, so Generate battlecard would have landed on sample data. `/review` now
-reads it and falls back to fixtures when absent. Verified both ways in a browser.
-Two things I need from you:
-- `ExportBar` takes `{ run }: RunResult`. The canvas exposes an `exportBar` **render prop** handed your exact shape *with Maya's edits applied* — import it into `review-client.tsx` and it works.
-- A live run shows **no** CACHED badge; cached and fixture runs do. Your `HonestyBadge` should replace my inline one so we don't ship two.
+Person A's branch is merged into `ryan`, and **the A→C handoff is verified live**: `/review`
+now renders A's real `battlecard.json` — 25 sentences, 20 evidence records, their actual
+1:48 PM fetch time on the CACHED badge. The sample fallback no longer fires.
 
-**B — your work isn't pushed yet**, so nobody can integrate against it. D's pipeline
-calls `/api/analyze` and `/api/draft`, and C's canvas renders whatever B9 assembles,
-so **pushing early beats pushing finished** — even a failing route unblocks wiring.
-The canvas has a `featureMatrix` slot waiting; send the prop signature when you can.
+`/api/audit` accepts `{ recipe, deliverable, evidence, price_tiers }` exactly as D's
+`pipeline-client.ts` posts it, and returns `{ deliverable }`. `price_tiers` is accepted and
+ignored — every number is checked against `deliverable.price_comparisons`, which A's
+`pricing.ts` computed.
 
-**A — two asks stand.** `Deliverable` still has no `evidence` field (D worked around
-it by wrapping the demo fixture, but a bare `Deliverable` still can't self-resolve).
-And `battlecard.json` says `word_count: 612` against 599 real words — C recomputes on
-load so the UI is right, but the literal is wrong.
+**Still needed from the rest of you:**
+1. **B — push, even unfinished.** `/api/analyze` and `/api/draft` are the only things left
+   between here and a live end-to-end run. A route returning a fixture is enough to wire against.
+2. **D — two integration points.** The canvas exposes an `exportBar` **render prop** handed your
+   exact `RunResult` shape *with Maya's edits applied*; import `ExportBar` into
+   `review-client.tsx` and it works. Swap your `HonestyBadge` in for C's inline one.
+   Note `/review` now prints to one page on its own (0.96 of A4) — compare with your PrintSheet
+   so we don't ship two print paths.
+3. **D — the favicon will break the build again** if regenerated as 8-bit RGB. Turbopack needs
+   RGBA; it was 500ing every route until re-encoded.
+4. **A — `Deliverable` still has no `evidence` field.** Provenance works because C falls back to
+   `evidence.json`, but a bare `Deliverable` can't self-resolve. Also `battlecard.json` says
+   `word_count: 612` against 599 real words — C recomputes on load, so the UI is right regardless.
 
 ## Person D — Shell, Export, Integration, Demo
 
