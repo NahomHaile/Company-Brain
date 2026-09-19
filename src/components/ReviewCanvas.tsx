@@ -22,7 +22,8 @@ import {
   type RiskResolution,
 } from "@/lib/review/mutate";
 import { partitionFlags, segmentSentence } from "@/lib/review/spans";
-import { prose } from "@/lib/review/theme";
+import { spoken, ui } from "@/lib/review/theme";
+import styles from "./review-canvas.module.css";
 
 const ISSUE_LABEL: Record<GroundingIssue["issue"], string> = {
   unsourced: "No source",
@@ -32,62 +33,58 @@ const ISSUE_LABEL: Record<GroundingIssue["issue"], string> = {
 };
 
 
-/** Nothing is computed here. Every number is read from Person A's pricing engine (spec 3.1). */
+/**
+ * The reference column: dense, tabular, small — glanced at, not read aloud.
+ *
+ * Stacked per comparison rather than a wide five-column table, because at
+ * reference-column width a table clips its own headers. Nothing here is
+ * computed; every figure comes from Person A's pricing engine (spec 3.1).
+ */
 function PriceComparisons({ rows }: { rows: PriceComparison[] }) {
   if (rows.length === 0) return null;
   return (
-    <section className="flex flex-col gap-3">
-      <h2 className="text-base font-medium text-[#1A1A17]">Price comparison</h2>
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse text-sm">
-          <thead>
-            <tr className="border-b border-[#E3E2DC] text-left text-xs text-[#1A1A17]/55">
-              <th className="py-2 pr-4 font-normal">Our tier</th>
-              <th className="py-2 pr-4 font-normal">Their tier</th>
-              <th className="py-2 pr-4 font-normal">Ours / seat</th>
-              <th className="py-2 pr-4 font-normal">Theirs / seat</th>
-              <th className="py-2 font-normal">Difference</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((row) => (
-              <tr
-                key={`${row.our_tier}:${row.their_tier}`}
-                className="border-b border-[#E3E2DC]/60 align-top text-[#1A1A17]"
-              >
-                <td className="py-2.5 pr-4">{row.our_tier}</td>
-                <td className="py-2.5 pr-4">{row.their_tier}</td>
-                <td className="py-2.5 pr-4 tabular-nums">
+    <section className={`${styles.reference} flex flex-col gap-3`}>
+      <h3 className="text-[13px] font-semibold text-[#14171A]">
+        Price comparison
+      </h3>
+      <div className="flex flex-col gap-3">
+        {rows.map((row) => {
+          const label = priceDeltaLabel(row);
+          return (
+            <div
+              key={`${row.our_tier}:${row.their_tier}`}
+              className="flex flex-col gap-1 border-t border-[#D7D3CA] pt-2"
+            >
+              <p className="text-[11px] text-[#6B7076]">
+                {row.our_tier} vs {row.their_tier}
+              </p>
+              <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-0.5 text-[13px] text-[#14171A]">
+                <dt className="text-[#6B7076]">Ours</dt>
+                <dd className="tabular-nums">
                   {money(row.normalized_monthly_per_seat_ours)}
-                </td>
-                <td className="py-2.5 pr-4 tabular-nums">
+                </dd>
+                <dt className="text-[#6B7076]">Theirs</dt>
+                <dd className="tabular-nums">
                   {money(row.normalized_monthly_per_seat_theirs)}
-                </td>
-                <td className="py-2.5">
-                  {(() => {
-                    const label = priceDeltaLabel(row);
-                    return (
-                      <span
-                        className={
-                          label.kind === "incomparable"
-                            ? "text-[#B3701A]"
-                            : "tabular-nums"
-                        }
-                      >
-                        {label.text}
-                      </span>
-                    );
-                  })()}
-                  {row.caveat && (
-                    <span className="mt-1 block text-xs text-[#1A1A17]/55">
-                      {row.caveat}
-                    </span>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                </dd>
+              </dl>
+              <p
+                className={`text-[13px] font-medium ${
+                  label.kind === "incomparable"
+                    ? "text-[#9E3320]"
+                    : "tabular-nums text-[#14171A]"
+                }`}
+              >
+                {label.text}
+              </p>
+              {row.caveat && (
+                <p className="text-[11px] leading-snug text-[#6B7076]">
+                  {row.caveat}
+                </p>
+              )}
+            </div>
+          );
+        })}
       </div>
     </section>
   );
@@ -155,21 +152,12 @@ function SentenceRow({
   );
 
   return (
-    <div className="group grid grid-cols-[1.25rem_1fr_1.5rem] gap-x-2">
-      {/* Manuscript gutter: problems are visible here without touching the prose. */}
-      <div aria-hidden className="pt-1 text-right text-xs leading-none">
-        {flags.some((f) => f.severity === "high") && (
-          <span className="text-[#A33A4A]">⚑</span>
-        )}
-        {flags.length > 0 && !flags.some((f) => f.severity === "high") && (
-          <span className="text-[#A33A4A]/60">⚑</span>
-        )}
-        {flags.length === 0 && issues.length > 0 && (
-          <span className="text-[#B3701A]">?</span>
-        )}
-      </div>
-
-      <div className="flex flex-col gap-1">
+    <div className="group grid grid-cols-[1fr_1.25rem] gap-x-2">
+      {/* An unsourced line carries a proofreader's rule in the margin: the note
+          is about the line, not about any word in it. */}
+      <div
+        className={`flex flex-col gap-1 ${unsourced ? styles.unsourced : ""}`}
+      >
         {editing ? (
           <Textarea
             autoFocus
@@ -183,15 +171,11 @@ function SentenceRow({
               }
               if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) commit();
             }}
-            className={`${prose.className} min-h-[4.5rem] text-[17px] leading-[1.7]`}
+            className={`${spoken.className} min-h-[4.5rem] rounded-none border-[#D7D3CA] text-[20px] leading-[1.6]`}
           />
         ) : (
           <p
-            className={`${prose.className} text-[17px] leading-[1.7] text-[#1A1A17] ${
-              unsourced
-                ? "underline decoration-dotted decoration-1 underline-offset-4 decoration-[#B3701A]"
-                : ""
-            }`}
+            className={`${spoken.className} text-[20px] leading-[1.6] text-[#14171A]`}
           >
             {body}
           </p>
@@ -200,7 +184,7 @@ function SentenceRow({
         {issues.map((issue, i) => (
           <p
             key={`${sentence.id}:${issue.issue}:${i}`}
-            className="text-xs leading-snug text-[#B3701A]"
+            className={`${ui.className} text-[11px] leading-snug text-[#9E3320]`}
           >
             {ISSUE_LABEL[issue.issue]} — {issue.detail}
           </p>
@@ -208,19 +192,19 @@ function SentenceRow({
 
         {/* Edits can orphan a span. Surface those flags; never drop them (spec 3.3). */}
         {unmatched.length > 0 && (
-          <div className="mt-1 flex flex-col gap-1 border-l-2 border-[#A33A4A]/40 py-1 pl-3">
-            <p className="text-xs text-[#1A1A17]/55">
+          <div className={`${ui.className} ${styles.noPrint} mt-1 flex flex-col gap-1 border-l-2 border-[#9E3320]/40 py-1 pl-3`}>
+            <p className="text-[11px] text-[#6B7076]">
               No longer matches this sentence
             </p>
             {unmatched.map((flag) => (
               <div key={flag.id} className="flex flex-wrap items-baseline gap-2">
-                <span className="text-xs text-[#A33A4A]">
+                <span className="text-[11px] text-[#9E3320]">
                   “{flag.span}” — {flag.why}
                 </span>
                 <button
                   type="button"
                   onClick={() => onResolve(flag.id, "approved")}
-                  className="text-xs text-[#1A1A17]/55 underline underline-offset-2 hover:text-[#1A1A17]"
+                  className="text-[11px] text-[#6B7076] underline underline-offset-2 hover:text-[#14171A]"
                 >
                   Dismiss
                 </button>
@@ -235,7 +219,7 @@ function SentenceRow({
           type="button"
           onClick={startEditing}
           aria-label="Edit this sentence"
-          className="h-5 rounded-xs text-xs leading-none text-[#1A1A17]/0 transition-colors group-hover:text-[#1A1A17]/40 hover:!text-[#1A1A17] focus-visible:text-[#1A1A17] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2F6F5E]"
+          className={`${styles.editAffordance} h-5 rounded-none text-[11px] leading-none text-transparent transition-colors group-hover:text-[#6B7076] hover:!text-[#14171A] focus-visible:text-[#14171A] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#6B7076]`}
         >
           ✎
         </button>
@@ -276,36 +260,56 @@ export function ReviewCanvas({
     return map;
   }, [deliverable.grounding_issues]);
 
-  return (
-    <div className="flex flex-col gap-10">
-      {deliverable.sections.map((section) => (
-        <section key={section.key} className="flex flex-col gap-3">
-          <h2 className="text-base font-medium text-[#1A1A17]">
-            {section.title}
-          </h2>
-          <hr className="border-[#E3E2DC]" />
-          <div className="flex flex-col gap-4">
-            {section.sentences.map((sentence) => (
-              <SentenceRow
-                key={sentence.id}
-                sentence={sentence}
-                flags={pendingFlagsFor(deliverable, sentence.id)}
-                issues={issuesBySentence.get(sentence.id) ?? []}
-                evidence={evidenceIndex}
-                onResolve={(flagId, resolution) =>
-                  onChange(resolveFlag(deliverable, flagId, resolution))
-                }
-                onEdit={(text) =>
-                  onChange(editSentence(deliverable, sentence.id, text))
-                }
-              />
-            ))}
-          </div>
-        </section>
-      ))}
+  const hasReference =
+    deliverable.price_comparisons.length > 0 || featureMatrix !== undefined;
 
-      <PriceComparisons rows={deliverable.price_comparisons} />
-      {featureMatrix}
+  return (
+    // Asymmetry carries information: left is what Maya glances at, right is
+    // what she says out loud. Different families and sizes, so mid-call the eye
+    // never confuses the two. Print collapses this to one column.
+    <div
+      className={`${styles.layout} grid grid-cols-1 gap-x-10 gap-y-8 lg:grid-cols-[minmax(0,19rem)_minmax(0,1fr)]`}
+    >
+      {hasReference && (
+        <aside className={`${ui.className} flex flex-col gap-6 lg:sticky lg:top-8 lg:self-start`}>
+          <PriceComparisons rows={deliverable.price_comparisons} />
+          {featureMatrix}
+        </aside>
+      )}
+
+      {/* The spoken column. Recipe-agnostic: sections are iterated generically
+          and never branched on, so the investor update renders here too. */}
+      <div
+        className={`flex flex-col gap-9 ${hasReference ? "" : "lg:col-span-2"}`}
+      >
+        {deliverable.sections.map((section) => (
+          <section key={section.key} className="flex flex-col gap-3">
+            <h2
+              className={`${ui.className} text-[13px] font-semibold tracking-tight text-[#14171A]`}
+            >
+              {section.title}
+            </h2>
+            <hr className="border-[#D7D3CA]" />
+            <div className="flex flex-col gap-5">
+              {section.sentences.map((sentence) => (
+                <SentenceRow
+                  key={sentence.id}
+                  sentence={sentence}
+                  flags={pendingFlagsFor(deliverable, sentence.id)}
+                  issues={issuesBySentence.get(sentence.id) ?? []}
+                  evidence={evidenceIndex}
+                  onResolve={(flagId, resolution) =>
+                    onChange(resolveFlag(deliverable, flagId, resolution))
+                  }
+                  onEdit={(text) =>
+                    onChange(editSentence(deliverable, sentence.id, text))
+                  }
+                />
+              ))}
+            </div>
+          </section>
+        ))}
+      </div>
     </div>
   );
 }

@@ -1,0 +1,161 @@
+/* Annotation system — CADENCE-DESIGN-DIRECTION.md §4.
+   Three overlays, three ways a person marks up a printed page. These live in a
+   CSS module rather than Tailwind because they need gradients with soft edges,
+   box-decoration-break across wrapped lines, and print rules. */
+
+/* Risk-flagged span: a highlighter swipe. The gradient's transparent ends make
+   the stroke read as slightly ragged rather than a clean rectangle, and
+   box-decoration-break repeats it per line when the span wraps. Ink stays dark
+   on yellow — never light text on the marker (§8). */
+.flagged {
+  background: linear-gradient(
+    to right,
+    transparent 0,
+    #f2e85c 2px,
+    #f2e85c calc(100% - 3px),
+    transparent 100%
+  );
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  padding: 0.1em 0.15em;
+  color: #14171a;
+  cursor: pointer;
+  border-radius: 1px;
+}
+
+.flagged:hover {
+  background: linear-gradient(
+    to right,
+    transparent 0,
+    #eddf3c 2px,
+    #eddf3c calc(100% - 3px),
+    transparent 100%
+  );
+}
+
+.flagged:focus-visible {
+  outline: 2px solid #9e3320;
+  outline-offset: 2px;
+}
+
+/* A high-severity span gets a second stroke under the swipe. Severity is
+   carried structurally, not by a second colour — three hues would read as a
+   traffic light. */
+.severityHigh {
+  box-shadow: inset 0 -0.62em 0 -0.5em #9e3320;
+}
+
+/* Provenance: a dotted pencil underline. This is the affordance — an unmarked
+   sentence advertises nothing, and hover-to-source is the point of the page. */
+.sourced {
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-decoration-color: #6b7076;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+  cursor: help;
+}
+
+.sourced[data-popup-open] {
+  background: #6b70761a;
+}
+
+.sourced:focus-visible {
+  outline: 2px solid #6b7076;
+  outline-offset: 2px;
+}
+
+/* Unsourced sentence: a proofreader's mark in the margin, not a text
+   treatment — it is a note about the line, not about any word in it. */
+.unsourced {
+  border-left: 3px solid #9e3320;
+  padding-left: 0.75rem;
+  margin-left: -0.9375rem;
+}
+
+/* Motion answers an action only (§8). */
+@media (prefers-reduced-motion: reduce) {
+  .flagged,
+  .sourced {
+    transition: none;
+  }
+}
+
+/* One page, one column, no interface chrome (§2, §8).
+   Maya opens this thirty seconds before a call, so it has to be one sheet.
+   Screen sizes are tuned for reading at a distance; print is tuned for
+   density, and the review affordances are dropped because paper is not
+   interactive. */
+@media print {
+  .layout {
+    display: block;
+  }
+
+  /* Screen margins are generous for reading; paper margins come from the
+     printer, so the page's own padding is mostly redundant here. */
+  .sheet {
+    gap: 0.6rem !important;
+    padding: 0 !important;
+    max-width: none !important;
+  }
+
+  .reference {
+    margin-bottom: 0.6rem;
+    break-inside: avoid;
+  }
+
+  .layout h2 {
+    margin-bottom: 0.15rem;
+    font-size: 8.5pt;
+  }
+
+  .layout hr {
+    margin-bottom: 0.2rem;
+  }
+
+  .layout section {
+    break-inside: avoid;
+  }
+
+  /* The flex gaps, not margins, are what set the rhythm on screen. Print needs
+     density, so they are collapsed here rather than in the markup. */
+  .layout > div {
+    gap: 0.45rem !important;
+  }
+
+  .layout section > div {
+    gap: 0.3rem !important;
+  }
+
+  .layout p {
+    font-size: 10pt !important;
+    line-height: 1.32 !important;
+  }
+
+  /* Grounding notes stay — they are part of the card's honesty — but drop to
+     a footnote size rather than competing with the spoken line. */
+  .layout p[class*="text-[11px]"] {
+    font-size: 7.5pt !important;
+  }
+
+  .editAffordance,
+  .noPrint {
+    display: none !important;
+  }
+
+  /* A filled highlighter costs ink and greys out on a mono printer. */
+  .flagged {
+    background: none;
+    box-shadow: inset 0 -0.14em 0 0 #f2e85c;
+    padding: 0;
+  }
+
+  .sourced {
+    text-decoration: none;
+  }
+
+  .unsourced {
+    padding-left: 0.5rem;
+    margin-left: -0.6rem;
+  }
+}

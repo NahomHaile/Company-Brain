@@ -9,7 +9,8 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import type { RiskFlag } from "@/lib/contracts";
-import { prose, riskUnderline } from "@/lib/review/theme";
+import { spoken, ui } from "@/lib/review/theme";
+import styles from "./review-canvas.module.css";
 
 /**
  * Enum values are for the model; Maya reads English. Covers both recipes so
@@ -69,7 +70,7 @@ export function RiskFlagSpan({
         // The sentence around this is a hover-provenance trigger. Without
         // this, one click would open both popovers.
         onClick={(event) => event.stopPropagation()}
-        className={`cursor-pointer rounded-xs ${riskUnderline[flag.severity]} focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#A33A4A]`}
+        className={`${styles.flagged} ${flag.severity === "high" ? styles.severityHigh : ""}`}
       >
         {children}
       </PopoverTrigger>
@@ -77,23 +78,23 @@ export function RiskFlagSpan({
       <PopoverContent
         side="bottom"
         sideOffset={8}
-        className="w-[min(24rem,calc(100vw-2rem))] gap-3 border-t-2 border-t-[#A33A4A] bg-[#FCFCFA] p-4"
+        className={`${ui.className} w-[min(24rem,calc(100vw-2rem))] gap-3 rounded-none border-l-2 border-l-[#9E3320] bg-white p-4 shadow-sm ring-1 ring-[#D7D3CA]`}
       >
         <div className="flex flex-col gap-1">
-          <p className="text-sm font-medium text-[#1A1A17]">
+          <p className="text-sm font-semibold text-[#14171A]">
             {CATEGORY_LABEL[flag.category]}
           </p>
-          <p className="text-xs text-[#A33A4A]">
+          <p className="text-[11px] text-[#9E3320]">
             {SEVERITY_LABEL[flag.severity]}
           </p>
         </div>
 
-        <p className="text-sm leading-relaxed text-[#1A1A17]/75">{flag.why}</p>
+        <p className="text-[13px] leading-relaxed text-[#14171A]/75">{flag.why}</p>
 
-        <div className="flex flex-col gap-1.5 border-l-2 border-[#E3E2DC] pl-3">
-          <p className="text-xs text-[#1A1A17]/55">Safer wording</p>
+        <div className="flex flex-col gap-1.5 border-l-2 border-[#D7D3CA] pl-3">
+          <p className="text-[11px] text-[#6B7076]">Safer wording</p>
           <p
-            className={`${prose.className} text-[15px] leading-relaxed text-[#1A1A17]`}
+            className={`${spoken.className} text-[15px] leading-relaxed text-[#14171A]`}
           >
             {flag.suggested_alternative}
           </p>

@@ -12,7 +12,8 @@ import {
   getStoredRunSnapshot,
   subscribeToStoredRun,
 } from "@/lib/review/stored-run";
-import { prose } from "@/lib/review/theme";
+import { spoken, ui } from "@/lib/review/theme";
+import styles from "@/components/review-canvas.module.css";
 
 /** Where the deliverable on screen came from. Drives the honesty badge (spec 4). */
 type Origin = "live" | "cached" | "fixture";
@@ -26,7 +27,7 @@ export type ReviewedRun = {
 };
 
 function Stat({ children }: { children: ReactNode }) {
-  return <span className="text-xs text-[#1A1A17]/55">{children}</span>;
+  return <span className="text-[11px] text-[#6B7076]">{children}</span>;
 }
 
 export function ReviewClient({
@@ -80,19 +81,19 @@ export function ReviewClient({
         : cachedLabel;
 
   return (
-    <div className="min-h-full bg-[#FCFCFA]">
-      <div className="mx-auto flex max-w-[76ch] flex-col gap-8 px-6 py-12">
-        <header className="flex flex-col gap-3">
+    <div className={`${ui.className} min-h-full bg-white`}>
+      <div className={`${styles.sheet} mx-auto flex max-w-[76rem] flex-col gap-8 px-6 py-10`}>
+        <header className="flex flex-col gap-2 border-b border-[#D7D3CA] pb-4">
           {badge && (
             <Badge
               variant="outline"
-              className="w-fit border-[#B3701A]/40 bg-[#B3701A]/10 text-[#B3701A]"
+              className="w-fit rounded-none border-[#9E3320]/40 bg-[#9E3320]/8 text-[11px] font-medium text-[#9E3320]"
             >
               {badge}
             </Badge>
           )}
           <h1
-            className={`${prose.className} text-3xl leading-tight text-[#1A1A17]`}
+            className={`${spoken.className} text-[32px] leading-tight font-medium text-[#14171A]`}
           >
             {deliverable.subject_label}
           </h1>
@@ -100,14 +101,14 @@ export function ReviewClient({
             <Stat>Drafted {draftedLabel}</Stat>
             <Stat>{wordCount(deliverable)} words</Stat>
             <span
-              className={`text-xs ${openFlags > 0 ? "text-[#A33A4A]" : "text-[#1A1A17]/55"}`}
+              className={`text-[11px] ${openFlags > 0 ? "font-medium text-[#9E3320]" : "text-[#6B7076]"}`}
             >
               {openFlags === 0
                 ? "No open flags"
                 : `${openFlags} ${openFlags === 1 ? "flag" : "flags"} to review`}
             </span>
             <span
-              className={`text-xs ${gaps > 0 ? "text-[#B3701A]" : "text-[#1A1A17]/55"}`}
+              className={`text-[11px] ${gaps > 0 ? "font-medium text-[#9E3320]" : "text-[#6B7076]"}`}
             >
               {gaps === 0
                 ? "Every claim sourced"
