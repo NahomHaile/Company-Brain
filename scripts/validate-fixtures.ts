@@ -75,10 +75,14 @@ const evidenceIds = new Set(
 for (const file of ["battlecard.json", "update.json"]) {
   const path = join(DIR, file);
   if (!existsSync(path)) continue;
-  const d = JSON.parse(readFileSync(path, "utf8"));
+  // Re-parse through the schema so everything below is typed rather than any.
+  // It already passed validation above; this just recovers the types.
+  const parsed = Deliverable.safeParse(JSON.parse(readFileSync(path, "utf8")));
+  if (!parsed.success) continue; // already reported as a schema failure
+  const d = parsed.data;
 
-  const sentences = d.sections.flatMap((s: any) => s.sentences);
-  const sentenceIds = new Set(sentences.map((s: any) => s.id));
+  const sentences = d.sections.flatMap((s) => s.sentences);
+  const sentenceIds = new Set(sentences.map((s) => s.id));
   const problems: string[] = [];
 
   const checkEvidence = (ids: string[], where: string) => {
@@ -98,7 +102,7 @@ for (const file of ["battlecard.json", "update.json"]) {
     }
     // The canvas highlights the span by substring match. If it isn't in the
     // sentence, the flag silently renders nothing.
-    const sentence = sentences.find((s: any) => s.id === flag.sentence_id);
+    const sentence = sentences.find((s) => s.id === flag.sentence_id)!;
     if (!sentence.text.includes(flag.span)) {
       problems.push(`${flag.id} span is not a substring of ${flag.sentence_id}`);
     }

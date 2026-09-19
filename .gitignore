@@ -50,3 +50,6 @@ next-env.d.ts
 # runtime page cache — fixtures are the committed fallback
 /data/cache/
 /data/session.json
+
+# empty stray file, not part of Person A scope
+team-directive.md
