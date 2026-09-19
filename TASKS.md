@@ -76,9 +76,10 @@ Two things I need from you:
 - `ExportBar` takes `{ run }: RunResult`. The canvas exposes an `exportBar` **render prop** handed your exact shape *with Maya's edits applied* — import it into `review-client.tsx` and it works.
 - A live run shows **no** CACHED badge; cached and fixture runs do. Your `HonestyBadge` should replace my inline one so we don't ship two.
 
-**B — nothing of yours exists on any branch.** `/api/analyze` and `/api/draft` are
-what D's pipeline calls, so **no live end-to-end run is possible until you ship.**
-The canvas has a `featureMatrix` slot waiting; send the prop signature.
+**B — your work isn't pushed yet**, so nobody can integrate against it. D's pipeline
+calls `/api/analyze` and `/api/draft`, and C's canvas renders whatever B9 assembles,
+so **pushing early beats pushing finished** — even a failing route unblocks wiring.
+The canvas has a `featureMatrix` slot waiting; send the prop signature when you can.
 
 **A — two asks stand.** `Deliverable` still has no `evidence` field (D worked around
 it by wrapping the demo fixture, but a bare `Deliverable` still can't self-resolve).
