@@ -23,12 +23,22 @@ export async function POST(request: Request) {
   const started = Date.now();
 
   try {
-    // TEMPORARY: with no body, fall back to B's sample evidence so the route is
-    // testable before A's fixtures land. Remove once /api/fetch is wired.
+    // TEMPORARY dev path, behind an EXPLICIT ?dev=1 — never on an empty body.
+    // Synthetic data returned as though it were live is the worst failure
+    // available under the §4 honesty contract.
     const raw = await request.text();
-    const evidence = raw.trim()
-      ? RequestBody.parse(JSON.parse(raw)).evidence
-      : SAMPLE_EVIDENCE;
+    const isDev = new URL(request.url).searchParams.get("dev") === "1";
+
+    if (!isDev && !raw.trim()) {
+      return Response.json(
+        { error: "empty_request_body", detail: "POST { evidence }, or use ?dev=1 for sample data." },
+        { status: 400 },
+      );
+    }
+
+    const evidence = isDev
+      ? SAMPLE_EVIDENCE
+      : RequestBody.parse(JSON.parse(raw)).evidence;
 
     // Ranking reads the matrix, so these cannot be parallelised.
     const featureMatrix = await buildFeatureMatrix(evidence);
@@ -37,6 +47,7 @@ export async function POST(request: Request) {
     return Response.json({
       feature_matrix: featureMatrix,
       differentiators,
+      ...(isDev ? { synthetic: true } : {}), // the UI must badge this — §4
       elapsed_ms: Date.now() - started,
     });
   } catch (error) {

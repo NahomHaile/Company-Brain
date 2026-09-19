@@ -18,7 +18,14 @@ import {
   type Section,
 } from "@/lib/contracts";
 import { DIFFERENTIATOR_SYSTEM, FEATURE_MATRIX_SYSTEM } from "../analyze";
-import { ASSEMBLY_SYSTEM, countWords, REGISTRY, withStableIds } from "../draft";
+import {
+  ASSEMBLY_SYSTEM,
+  assemblyViolations,
+  countWords,
+  REGISTRY,
+  stripDanglingCitations,
+  withStableIds,
+} from "../draft";
 import {
   BATTLECARD,
   PIVOTS_SYSTEM,
@@ -330,6 +337,64 @@ ok(
   "countWords is not fooled by double spaces",
   countWords([{ key: "k", title: "t", sentences: [{ id: "a", text: "  two   words  ", evidence_ids: [] }] }]) === 2,
 );
+
+// ===========================================================================
+group("14b. Degradation guards — the fallbacks must actually fire");
+// ===========================================================================
+
+// Assembly is instructed to preserve evidence ids. An instruction is not an
+// enforcement mechanism, so each way it can lie must be caught.
+ok("clean assembly reports no violations", assemblyViolations(renamed, renamed).length === 0);
+
+const droppedSection = renamed.slice(0, 5);
+ok("a dropped section is caught", assemblyViolations(renamed, droppedSection).length > 0);
+
+const lostCitation = renamed.map((s, i) =>
+  i === 0
+    ? { ...s, sentences: s.sentences.map((x) => ({ ...x, evidence_ids: [] })) }
+    : s,
+);
+ok(
+  "a silently dropped citation is caught",
+  assemblyViolations(renamed, lostCitation).some((p) => p.includes("lost citations")),
+);
+
+const inventedCitation = renamed.map((s, i) =>
+  i === 0
+    ? { ...s, sentences: s.sentences.map((x) => ({ ...x, evidence_ids: [...x.evidence_ids, "ev_999"] })) }
+    : s,
+);
+ok(
+  "an invented citation is caught",
+  assemblyViolations(renamed, inventedCitation).some((p) => p.includes("invented")),
+);
+
+const allRenamed = renamed.map((s) => ({
+  ...s,
+  sentences: s.sentences.map((x, i) => ({ ...x, id: `zz_${i}` })),
+}));
+ok(
+  "wholesale id renaming is caught (would orphan C's flags)",
+  assemblyViolations(renamed, allRenamed).some((p) => p.includes("no sentence ids survived")),
+);
+
+// Dangling citations must never reach the canvas — a hover that resolves to
+// nothing is worse than an admitted gap.
+const withGhost: Section[] = [
+  {
+    key: "positioning",
+    title: "Positioning",
+    sentences: [
+      { id: "positioning_s1", text: "Real.", evidence_ids: ["ev_001", "ev_999"] },
+      { id: "positioning_s2", text: "Also real.", evidence_ids: ["ev_004"] },
+    ],
+  },
+];
+const stripped = stripDanglingCitations(withGhost, SAMPLE_EVIDENCE);
+ok("dangling citation is removed", !stripped.sections[0].sentences[0].evidence_ids.includes("ev_999"));
+ok("real citation survives stripping", stripped.sections[0].sentences[0].evidence_ids.includes("ev_001"));
+ok("the dropped id is reported, not swallowed", stripped.dropped.includes("ev_999"));
+ok("untouched sentences keep their citations", stripped.sections[0].sentences[1].evidence_ids.length === 1);
 
 // ===========================================================================
 group("15. A full Deliverable validates against the contract");
