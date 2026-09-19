@@ -79,3 +79,45 @@ export function getCachedRun(): CachedRun {
   if (!parsed) parsed = CachedRun.parse(cachedRunJson);
   return parsed;
 }
+
+/**
+ * Simulated connectors — CADENCE-BUILD-SPEC.md §4.
+ *
+ * These buttons load fixtures. There is no Slack app, no CRM integration and no
+ * calendar OAuth behind them, and every one renders a SIMULATED CONNECTOR badge
+ * next to it. All content below is synthetic Thicket data.
+ */
+export const SIMULATED_SOURCES = [
+  {
+    id: "slack",
+    label: "Pull from Slack",
+    source_label: "Slack #general — synthetic",
+    text: `#general — Sep 2
+Maya: closed Riverbend Vet (4 locations, 11 seats). Biggest logo yet.
+Dev: reminders API was down ~40 min Tuesday, root cause was our retry queue. Fixed.
+
+#general — Sep 9
+Maya: Northgate churned. They went to an all-in-one PIMS. Second one this quarter that left for consolidation.
+Priya: onboarding backlog is 6 practices deep, I'm the only one doing it.
+
+#general — Sep 16
+Maya: MRR crossed 41K. Net new 3.1K, churn 1.4K.
+Maya: still no answer from the two intros Chen promised in July.`,
+  },
+  {
+    id: "crm",
+    label: "Pull from CRM",
+    source_label: "CRM export — synthetic",
+    text: `stage,count,notes
+discovery,9,"6 inbound, 3 from vet conference list"
+pilot,4,"Brookside, Riverbend, two unnamed"
+closed_won,2,"Riverbend Vet, Cedar Park Animal"
+closed_lost,3,"Northgate (consolidation), two on price"`,
+  },
+  {
+    id: "calendar",
+    label: "Pull from calendar",
+    source_label: "Calendar — synthetic",
+    text: `Sep: 31 discovery calls taken (6-9/wk), 4 investor 1:1s, 2 candidate screens for the ops hire.`,
+  },
+] as const;
