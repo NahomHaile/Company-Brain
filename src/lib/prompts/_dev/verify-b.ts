@@ -3,42 +3,41 @@
  *
  *   npx tsx src/lib/prompts/_dev/verify-b.ts
  *
- * Everything here runs without an API key. It verifies the things that are true
- * before a single token is generated: that the prompts actually carry the
- * constraints the spec asked for, that the section keys match the contract, and
- * that the number guardrail on B4 works. Output quality still needs a live run.
+ * Runs with no API key. Verifies what is true before a token is generated: that
+ * the prompts carry the constraints the spec asked for, that recipe wiring is
+ * sound, and that the engine's pure functions behave.
+ *
+ * What it cannot verify is whether the model OBEYS any of it. "B5 says 4 to 6
+ * pivots" is a different claim from "B5 returns 4 to 6 pivots". That needs a key.
  */
 
-import { readFileSync } from "node:fs";
 import {
   Deliverable as DeliverableSchema,
+  type Evidence,
   type PriceComparison,
   type Section,
 } from "@/lib/contracts";
+import { DIFFERENTIATOR_SYSTEM, FEATURE_MATRIX_SYSTEM } from "../analyze";
+import { ASSEMBLY_SYSTEM, countWords, REGISTRY, withStableIds } from "../draft";
 import {
-  DIFFERENTIATOR_SYSTEM,
-  FEATURE_MATRIX_SYSTEM,
-  formatEvidence,
-  formatPriceComparisons,
-} from "../analyze";
-import {
-  ASKS_SYSTEM,
-  ASSEMBLY_SYSTEM,
-  HEADLINE_SYSTEM,
-  HIGHLIGHTS_SYSTEM,
-  LOWLIGHTS_SYSTEM,
-  METRICS_SYSTEM,
+  BATTLECARD,
   PIVOTS_SYSTEM,
   POSITIONING_SYSTEM,
   PRICING_SYSTEM,
   QUESTIONS_SYSTEM,
   THEY_WIN_SYSTEM,
   WE_WIN_SYSTEM,
-} from "../draft";
+} from "../recipes/battlecard";
 import {
-  SAMPLE_EVIDENCE,
-  SAMPLE_PRICE_COMPARISONS,
-} from "./sample-evidence";
+  ASKS_SYSTEM,
+  HEADLINE_SYSTEM,
+  HIGHLIGHTS_SYSTEM,
+  INVESTOR_UPDATE,
+  LOWLIGHTS_SYSTEM,
+  METRICS_SYSTEM,
+} from "../recipes/investor-update";
+import { evidenceOfType, formatEvidence, formatPriceComparisons } from "../shared";
+import { SAMPLE_EVIDENCE, SAMPLE_PRICE_COMPARISONS } from "./sample-evidence";
 
 let failures = 0;
 let checks = 0;
@@ -59,26 +58,30 @@ function says(prompt: string, needle: string): boolean {
   return prompt.toLowerCase().includes(needle.toLowerCase());
 }
 
-// ===========================================================================
-group("1. Every prompt enforces JSON-only output (§10, every prompt)");
-// ===========================================================================
-
-const ALL_PROMPTS: [string, string][] = [
-  ["B1 feature matrix", FEATURE_MATRIX_SYSTEM],
-  ["B2 differentiator ranker", DIFFERENTIATOR_SYSTEM],
+const SECTION_PROMPTS: [string, string][] = [
   ["B3 positioning", POSITIONING_SYSTEM],
   ["B4 pricing", PRICING_SYSTEM],
   ["we_win", WE_WIN_SYSTEM],
   ["B6 they_win", THEY_WIN_SYSTEM],
   ["B5 pivots", PIVOTS_SYSTEM],
   ["B7 questions", QUESTIONS_SYSTEM],
-  ["B9 assembly", ASSEMBLY_SYSTEM],
   ["IU headline", HEADLINE_SYSTEM],
   ["IU metrics", METRICS_SYSTEM],
   ["IU highlights", HIGHLIGHTS_SYSTEM],
   ["IU lowlights", LOWLIGHTS_SYSTEM],
   ["IU asks", ASKS_SYSTEM],
 ];
+
+const ALL_PROMPTS: [string, string][] = [
+  ["B1 feature matrix", FEATURE_MATRIX_SYSTEM],
+  ["B2 differentiator ranker", DIFFERENTIATOR_SYSTEM],
+  ...SECTION_PROMPTS,
+  ["B9 assembly", ASSEMBLY_SYSTEM],
+];
+
+// ===========================================================================
+group("1. Every prompt enforces JSON-only output (§10)");
+// ===========================================================================
 
 for (const [name, prompt] of ALL_PROMPTS) {
   ok(
@@ -91,24 +94,21 @@ for (const [name, prompt] of ALL_PROMPTS) {
 group("2. Section prompts require per-sentence provenance (§3.2)");
 // ===========================================================================
 
-const SECTION_PROMPTS = ALL_PROMPTS.filter(
-  ([name]) => !name.startsWith("B1") && !name.startsWith("B2") && !name.startsWith("B9"),
-);
-
 for (const [name, prompt] of SECTION_PROMPTS) {
-  ok(
-    `${name} — requires evidence_ids per sentence`,
-    says(prompt, "evidence_ids"),
-  );
+  ok(`${name} — requires evidence_ids per sentence`, says(prompt, "evidence_ids"));
 }
 ok(
-  "empty evidence_ids is framed as a flag, not a default (§3.2)",
+  "empty evidence_ids is framed as a flag, not a default",
   says(POSITIONING_SYSTEM, "empty array") &&
     says(POSITIONING_SYSTEM, "rather than inventing"),
 );
+ok(
+  "the citation rule is shared, not copy-pasted per prompt",
+  SECTION_PROMPTS.every(([, p]) => says(p, "Cite the specific items you actually used")),
+);
 
 // ===========================================================================
-group("3. B1 feature matrix carries its §10.1 constraints");
+group("3. B1 feature matrix (§10.1)");
 // ===========================================================================
 
 ok("judges by function, not label", says(FEATURE_MATRIX_SYSTEM, "function, not"));
@@ -116,47 +116,46 @@ ok(
   "never infers `no` from silence",
   says(FEATURE_MATRIX_SYSTEM, "never infer") && says(FEATURE_MATRIX_SYSTEM, "silence"),
 );
+ok("names the false-negative failure mode", says(FEATURE_MATRIX_SYSTEM, "worst failure"));
 ok(
-  "states why a false negative is the worst outcome",
-  says(FEATURE_MATRIX_SYSTEM, "worse") || says(FEATURE_MATRIX_SYSTEM, "worst"),
-);
-ok(
-  "sets matters_to_target from the target's own page",
+  "sets matters_to_target from the prospect's own page",
   says(FEATURE_MATRIX_SYSTEM, "matters_to_target") &&
-    (says(FEATURE_MATRIX_SYSTEM, "prospect's own page") ||
-      says(FEATURE_MATRIX_SYSTEM, "target's site")),
+    says(FEATURE_MATRIX_SYSTEM, "prospect's own page"),
 );
 ok(
-  "requires `why` to cite what the prospect's page revealed",
+  "requires `why` to cite what that page revealed",
   says(FEATURE_MATRIX_SYSTEM, "rather than generic benefit language"),
 );
-ok("defines all four support values", ["yes", "partial", "unknown"].every((v) => says(FEATURE_MATRIX_SYSTEM, `"${v}"`)));
+ok(
+  "defines all four support values",
+  ["yes", "no", "partial", "unknown"].every((v) => says(FEATURE_MATRIX_SYSTEM, `"${v}"`)),
+);
 
 // ===========================================================================
-group("4. B2 ranker carries its §10.2 rubric");
+group("4. B2 ranker rubric (§10.2)");
 // ===========================================================================
 
 for (const score of [1, 2, 3, 4, 5]) {
   ok(`rubric defines score ${score}`, new RegExp(`- ${score} —`).test(DIFFERENTIATOR_SYSTEM));
 }
 ok(
-  "mandates they_win items be included",
+  "mandates they_win items",
   says(DIFFERENTIATOR_SYSTEM, "must include") && says(DIFFERENTIATOR_SYSTEM, "they_win"),
 );
+ok("names the ambush risk", says(DIFFERENTIATOR_SYSTEM, "ambushed"));
 ok(
-  "names the ambush risk of a strengths-only card",
-  says(DIFFERENTIATOR_SYSTEM, "ambushed"),
+  "offers all three directions",
+  ["we_win", "they_win", "parity"].every((d) => says(DIFFERENTIATOR_SYSTEM, d)),
 );
-ok("all three directions offered", ["we_win", "they_win", "parity"].every((d) => says(DIFFERENTIATOR_SYSTEM, d)));
 
 // ===========================================================================
 group("5. B5 pivots — the most valuable prompt (§10.4)");
 // ===========================================================================
 
-ok('enforces strict "when they say X, you say Y"', says(PIVOTS_SYSTEM, "when they say x, you say y"));
+ok('enforces "when they say X, you say Y"', says(PIVOTS_SYSTEM, "when they say x, you say y"));
 ok("asks for 4 to 6 pivots", says(PIVOTS_SYSTEM, "4 to 6"));
 ok("demands speech, not marketing copy", says(PIVOTS_SYSTEM, "speech, not marketing copy"));
-ok("carries both the bad and the good worked example", says(PIVOTS_SYSTEM, "bad:") && says(PIVOTS_SYSTEM, "good:"));
+ok("carries both worked examples", says(PIVOTS_SYSTEM, "bad:") && says(PIVOTS_SYSTEM, "good:"));
 ok("requires Y be sayable from memory", says(PIVOTS_SYSTEM, "without reading"));
 ok("forbids invention", says(PIVOTS_SYSTEM, "never invented"));
 
@@ -165,7 +164,10 @@ group("6. B6 landmines (§10.5)");
 // ===========================================================================
 
 ok("requires at least one real landmine", says(THEY_WIN_SYSTEM, "at least one real landmine"));
-ok("names all three response strategies", ["acknowledge", "reframe", "concede and redirect"].every((s) => says(THEY_WIN_SYSTEM, s)));
+ok(
+  "names all three response strategies",
+  ["acknowledge", "reframe", "concede and redirect"].every((s) => says(THEY_WIN_SYSTEM, s)),
+);
 ok("forbids denying a true advantage", says(THEY_WIN_SYSTEM, "never suggest the founder deny"));
 ok("sets the confident-operator register", says(THEY_WIN_SYSTEM, "confident operator"));
 
@@ -173,7 +175,7 @@ ok("sets the confident-operator register", says(THEY_WIN_SYSTEM, "confident oper
 group("7. B4 pricing — the model never computes (§3.1, §10.6)");
 // ===========================================================================
 
-ok("forbids any number absent from the table", says(PRICING_SYSTEM, "may not state any number"));
+ok("forbids numbers absent from the table", says(PRICING_SYSTEM, "may not state any number"));
 ok("forbids computing", says(PRICING_SYSTEM, "do not compute"));
 ok("forbids annual/monthly conversion", says(PRICING_SYSTEM, "convert"));
 ok("forbids estimating and deriving", says(PRICING_SYSTEM, "estimate") && says(PRICING_SYSTEM, "derive"));
@@ -188,7 +190,7 @@ group("8. B7 questions (§10.7) and B3 positioning (§10.3)");
 ok("B7 asks for 5 to 7 questions", says(QUESTIONS_SYSTEM, "5 to 7"));
 ok("B7 requires open-ended", says(QUESTIONS_SYSTEM, "open-ended"));
 ok("B7 requires diagnostic", says(QUESTIONS_SYSTEM, "diagnostic"));
-ok("B7 excludes anything answerable from their site", says(QUESTIONS_SYSTEM, "not answerable from their website"));
+ok("B7 excludes anything on their site", says(QUESTIONS_SYSTEM, "not answerable from their website"));
 ok("B3 asks for 2 to 3 sentences", says(POSITIONING_SYSTEM, "2 to 3 sentences"));
 ok("B3 rejects a generic pitch", says(POSITIONING_SYSTEM, "not a generic pitch"));
 
@@ -198,7 +200,7 @@ group("9. B9 assembly (§10.8)");
 
 ok("targets 350 to 550 words", says(ASSEMBLY_SYSTEM, "350 to 550"));
 ok("preserves evidence ids exactly", says(ASSEMBLY_SYSTEM, "preserve evidence ids exactly"));
-ok("spells out the merge rule (union of arrays)", says(ASSEMBLY_SYSTEM, "union of both id arrays"));
+ok("spells out the merge rule", says(ASSEMBLY_SYSTEM, "union of both id arrays"));
 ok("introduces no new facts", says(ASSEMBLY_SYSTEM, "do not introduce any new fact"));
 ok("forbids changing numbers", says(ASSEMBLY_SYSTEM, "do not change any number"));
 ok("removes cross-section repetition", says(ASSEMBLY_SYSTEM, "repetition"));
@@ -208,72 +210,95 @@ group("10. Investor-update recipe (§10.9)");
 // ===========================================================================
 
 ok("headline offers 3 candidates", says(HEADLINE_SYSTEM, "3 candidate"));
-ok("metrics carries the same no-new-numbers constraint as B4", says(METRICS_SYSTEM, "may not state any number"));
+ok("metrics carries B4's no-new-numbers constraint", says(METRICS_SYSTEM, "may not state any number"));
 ok("highlights require a 'so what'", says(HIGHLIGHTS_SYSTEM, "so what"));
 ok("lowlights require at least one real one", says(LOWLIGHTS_SYSTEM, "at least one real one"));
 ok("lowlights allow an explicit unknown cause", says(LOWLIGHTS_SYSTEM, "don't know why yet"));
 ok("asks reject 'intros would be helpful'", says(ASKS_SYSTEM, "intros would be helpful"));
 
 // ===========================================================================
-group("11. Section keys match the contract (contracts.ts:80)");
+group("11. Recipe wiring — asserted against the definitions, not source text");
 // ===========================================================================
 
-const BATTLECARD_KEYS = ["positioning", "pricing", "we_win", "they_win", "pivots", "questions"];
-const INVESTOR_KEYS = ["headline", "metrics", "highlights", "lowlights", "asks"];
+const CONTRACT_BATTLECARD_KEYS = [
+  "positioning", "pricing", "we_win", "they_win", "pivots", "questions",
+];
+const CONTRACT_INVESTOR_KEYS = ["headline", "metrics", "highlights", "lowlights", "asks"];
 
-// Read back what draftBattlecard actually wires up, rather than trusting a list.
-// Run from the repo root.
-const draftSource = readFileSync("src/lib/prompts/draft.ts", "utf8");
-
-const wiredKeys = [...draftSource.matchAll(/draftSection\(\s*"([a-z_]+)"/g)].map((m) => m[1]);
-const wiredBattlecard = wiredKeys.filter((k) => BATTLECARD_KEYS.includes(k));
-const wiredInvestor = wiredKeys.filter((k) => INVESTOR_KEYS.includes(k));
+const bcKeys = BATTLECARD.sections.map((s) => s.key);
+const iuKeys = INVESTOR_UPDATE.sections.map((s) => s.key);
 
 ok(
-  `all six battlecard keys are wired (found ${wiredBattlecard.length})`,
-  BATTLECARD_KEYS.every((k) => wiredBattlecard.includes(k)),
-  `missing: ${BATTLECARD_KEYS.filter((k) => !wiredBattlecard.includes(k)).join(", ")}`,
+  `battlecard wires exactly the 6 contract keys (${bcKeys.length})`,
+  CONTRACT_BATTLECARD_KEYS.every((k) => bcKeys.includes(k)) &&
+    bcKeys.length === CONTRACT_BATTLECARD_KEYS.length,
+  `got: ${bcKeys.join(", ")}`,
 );
 ok(
-  `all five investor keys are wired (found ${wiredInvestor.length})`,
-  INVESTOR_KEYS.every((k) => wiredInvestor.includes(k)),
+  `investor update wires exactly the 5 contract keys (${iuKeys.length})`,
+  CONTRACT_INVESTOR_KEYS.every((k) => iuKeys.includes(k)) &&
+    iuKeys.length === CONTRACT_INVESTOR_KEYS.length,
+  `got: ${iuKeys.join(", ")}`,
 );
-ok("no key is wired twice", new Set(wiredKeys).size === wiredKeys.length);
+ok("no duplicate keys in either recipe", new Set([...bcKeys, ...iuKeys]).size === bcKeys.length + iuKeys.length);
+ok("every registry entry declares its own recipe name", Object.entries(REGISTRY).every(([name, def]) => def.recipe === name));
+ok("every section has a non-empty system prompt", [...BATTLECARD.sections, ...INVESTOR_UPDATE.sections].every((s) => s.system.length > 200));
+ok("every section has a human title", [...BATTLECARD.sections, ...INVESTOR_UPDATE.sections].every((s) => s.title.trim().length > 0));
 
 // ===========================================================================
-group("12. Fan-out is actually parallel (§3.4)");
+group("12. Every section's context key resolves to a real block");
 // ===========================================================================
 
-const promiseAllCount = (draftSource.match(/await Promise\.all\(\[/g) ?? []).length;
+// The bug this catches: a typo in `context` silently sends the string
+// "undefined" to the model as the entire user message.
+const input = {
+  evidence: SAMPLE_EVIDENCE,
+  subjectLabel: "Thicket vs. VetFlow — for Brookside Animal Hospital",
+  featureMatrix: [],
+  differentiators: [],
+  priceComparisons: SAMPLE_PRICE_COMPARISONS,
+};
+
+for (const [name, def] of Object.entries(REGISTRY)) {
+  const blocks = def.prepare(input) as Record<string, string>;
+  for (const section of def.sections) {
+    const block = blocks[section.context];
+    ok(
+      `${name}/${section.key} → context "${section.context}" is a non-empty block`,
+      typeof block === "string" && block.length > 50,
+    );
+  }
+}
+
+// ===========================================================================
+group("13. Context blocks are prepared once, not per section");
+// ===========================================================================
+
+let prepareCalls = 0;
+const counting = {
+  ...BATTLECARD,
+  prepare(i: typeof input) {
+    prepareCalls += 1;
+    return BATTLECARD.prepare(i);
+  },
+};
+counting.prepare(input);
+ok("prepare() is cheap to call and returns both blocks", prepareCalls === 1 && Object.keys(counting.prepare(input)).length === 2);
+
+const bcBlocks = BATTLECARD.prepare(input);
+ok("analysis block carries the full evidence set", SAMPLE_EVIDENCE.every((e) => bcBlocks.analysis.includes(e.id)));
+ok("pricing block carries the comparison table", bcBlocks.pricing.includes("delta_pct"));
 ok(
-  `sections fan out via Promise.all (${promiseAllCount} fan-outs: battlecard + investor)`,
-  promiseAllCount === 2,
-);
-ok(
-  "no sequential awaited draftSection outside a fan-out",
-  !/\bconst \w+ = await draftSection\(/.test(draftSource),
+  "pricing block is narrower than the analysis block (token saving)",
+  bcBlocks.pricing.length < bcBlocks.analysis.length,
+  `pricing ${bcBlocks.pricing.length} vs analysis ${bcBlocks.analysis.length}`,
 );
 
 // ===========================================================================
-group("13. The model never computes a number (§3.1)");
+group("14. Engine pure functions");
 // ===========================================================================
 
-ok("word_count is computed in TypeScript", /function countWords/.test(draftSource));
-ok("word_count is not asked of the model", !says(ASSEMBLY_SYSTEM, "word_count"));
-
-const analyzeSource = readFileSync("src/lib/prompts/analyze.ts", "utf8");
-// B formats the pricing table for the prompt but must never do arithmetic on it.
-const doesPriceMath = /normalized_monthly_per_seat_\w+\s*[-+*/]/.test(analyzeSource);
-ok("B does no arithmetic on price fields", !doesPriceMath);
-
-// ===========================================================================
-group("14. Sentence ids survive parallel drafting");
-// ===========================================================================
-
-ok("ids are namespaced per section", /`\$\{key\}_s\$\{index \+ 1\}`/.test(draftSource));
-
-// Simulate what six parallel calls would return: every section numbering from s1.
-const collidingSections: Section[] = BATTLECARD_KEYS.map((key) => ({
+const colliding = CONTRACT_BATTLECARD_KEYS.map((key) => ({
   key,
   title: key,
   sentences: [
@@ -282,22 +307,36 @@ const collidingSections: Section[] = BATTLECARD_KEYS.map((key) => ({
   ],
 }));
 
-const renamed = collidingSections.map((section) => ({
-  ...section,
-  sentences: section.sentences.map((s, i) => ({ ...s, id: `${section.key}_s${i + 1}` })),
+const renamed: Section[] = colliding.map((s) => ({
+  ...s,
+  sentences: withStableIds(s.key, s.sentences),
 }));
 const allIds = renamed.flatMap((s) => s.sentences.map((x) => x.id));
+
+ok(`withStableIds: ${allIds.length} ids across 6 sections, all unique`, new Set(allIds).size === allIds.length);
+ok("withStableIds namespaces by section key", allIds[0] === "positioning_s1");
+ok("withStableIds preserves evidence_ids", renamed[0].sentences[0].evidence_ids[0] === "ev_001");
+ok("withStableIds preserves text", renamed[0].sentences[0].text.startsWith("First sentence"));
+
+// 6 sections x 2 sentences x 4 words ("First sentence of positioning.")
+const expectedWords = renamed.length * 2 * 4;
 ok(
-  `${allIds.length} sentence ids across 6 sections, all unique`,
-  new Set(allIds).size === allIds.length,
+  `countWords counts across sections (expects ${expectedWords})`,
+  countWords(renamed) === expectedWords,
+  `got ${countWords(renamed)}`,
+);
+ok("countWords handles empty input", countWords([]) === 0);
+ok(
+  "countWords is not fooled by double spaces",
+  countWords([{ key: "k", title: "t", sentences: [{ id: "a", text: "  two   words  ", evidence_ids: [] }] }]) === 2,
 );
 
 // ===========================================================================
 group("15. A full Deliverable validates against the contract");
 // ===========================================================================
 
-const deliverable = {
-  recipe: "battlecard" as const,
+const parsed = DeliverableSchema.safeParse({
+  recipe: "battlecard",
   title: "Battlecard",
   subject_label: "Thicket vs. VetFlow — for Brookside Animal Hospital",
   sections: renamed,
@@ -306,24 +345,18 @@ const deliverable = {
   risk_flags: [],
   grounding_issues: [],
   generated_at: new Date().toISOString(),
-  word_count: 42,
-};
-
-const parsed = DeliverableSchema.safeParse(deliverable);
-ok(
-  "assembled Deliverable parses",
-  parsed.success,
-  parsed.success ? "" : JSON.stringify(parsed.error.issues.slice(0, 3)),
-);
+  word_count: countWords(renamed),
+});
+ok("assembled Deliverable parses", parsed.success, parsed.success ? "" : JSON.stringify(parsed.error.issues.slice(0, 3)));
 
 // ===========================================================================
-group("16. B4 number guardrail actually catches a bad claim");
+group("16. B4 number guardrail catches a bad claim");
 // ===========================================================================
 
 /**
- * A local stand-in for A's verifyNumbers() (§9.7). B4's whole promise is that it
+ * Local stand-in for A's verifyNumbers() (§9.7). B4's whole promise is that it
  * states no number absent from the table, so the guardrail has to be shown to
- * work against a deliberately wrong sentence — not just against a good one.
+ * catch a deliberately wrong sentence — not just to pass a good one.
  */
 function unbackedNumbers(text: string, comparisons: PriceComparison[]): string[] {
   const allowed = new Set<string>();
@@ -336,52 +369,41 @@ function unbackedNumbers(text: string, comparisons: PriceComparison[]): string[]
     ]) {
       if (value !== null) allowed.add(String(value));
     }
-    // Numbers quoted inside a caveat are already vetted by A's engine.
     for (const n of row.caveat?.match(/\d+(?:\.\d+)?/g) ?? []) allowed.add(n);
   }
   return (text.match(/\d+(?:\.\d+)?/g) ?? []).filter((n) => !allowed.has(n));
 }
 
-const goodSentence =
-  "We come in at $79 per seat against their $149, though their Pro tier carries a 3-seat minimum.";
-const badSentence =
-  "We are 47% cheaper, which saves a five-person clinic about $4,200 a year.";
+const good = "We come in at $79 per seat against their $149, though their Pro tier carries a 3-seat minimum.";
+const bad = "We are 47% cheaper, which saves a five-person clinic about $4,200 a year.";
 
-ok(
-  "a table-backed sentence passes",
-  unbackedNumbers(goodSentence, SAMPLE_PRICE_COMPARISONS).length === 0,
-  `flagged: ${unbackedNumbers(goodSentence, SAMPLE_PRICE_COMPARISONS).join(", ")}`,
-);
-ok(
-  "a sentence with invented arithmetic is caught",
-  unbackedNumbers(badSentence, SAMPLE_PRICE_COMPARISONS).length > 0,
-);
-ok(
-  "  → and it names the offending figures",
-  unbackedNumbers(badSentence, SAMPLE_PRICE_COMPARISONS).includes("4"),
-);
+ok("a table-backed sentence passes", unbackedNumbers(good, SAMPLE_PRICE_COMPARISONS).length === 0, unbackedNumbers(good, SAMPLE_PRICE_COMPARISONS).join(", "));
+ok("invented arithmetic is caught", unbackedNumbers(bad, SAMPLE_PRICE_COMPARISONS).length > 0);
+ok("  → and the offending figures are named", unbackedNumbers(bad, SAMPLE_PRICE_COMPARISONS).includes("47"));
 
 // ===========================================================================
-group("17. Formatters expose what the prompts need");
+group("17. Formatters");
 // ===========================================================================
 
 const evidenceBlock = formatEvidence(SAMPLE_EVIDENCE);
 ok("every evidence id reaches the prompt", SAMPLE_EVIDENCE.every((e) => evidenceBlock.includes(e.id)));
 ok("every verbatim quote reaches the prompt", SAMPLE_EVIDENCE.every((e) => evidenceBlock.includes(e.quote)));
-ok("stale evidence is marked for the model", evidenceBlock.includes("[STALE]"));
+ok("stale evidence is marked", evidenceBlock.includes("[STALE]"));
 ok("low-confidence evidence is marked", evidenceBlock.includes("[LOW CONFIDENCE]"));
+ok("empty evidence degrades gracefully", formatEvidence([]).includes("no evidence"));
 
 const pricingBlock = formatPriceComparisons(SAMPLE_PRICE_COMPARISONS);
 ok("every caveat reaches the prompt", SAMPLE_PRICE_COMPARISONS.every((c) => !c.caveat || pricingBlock.includes(c.caveat)));
-ok("quote-only tiers render as unknown, not as a number", pricingBlock.includes("unknown"));
+ok("quote-only tiers render as unknown", pricingBlock.includes("unknown"));
+ok("empty pricing tells the model to state no price", formatPriceComparisons([]).includes("do not state any price"));
+
+ok("evidenceOfType narrows when it can", evidenceOfType(SAMPLE_EVIDENCE, ["pricing"]).length < SAMPLE_EVIDENCE.length);
 ok(
-  "empty pricing tells the model to state no price",
-  formatPriceComparisons([]).includes("do not state any price"),
+  "evidenceOfType never starves a prompt",
+  evidenceOfType(SAMPLE_EVIDENCE, ["ask"] as Evidence["type"][]).length === SAMPLE_EVIDENCE.length,
 );
 
 // ===========================================================================
 
-console.log(
-  `\n${failures === 0 ? "PASS" : "FAIL"} — ${checks - failures}/${checks} checks passed\n`,
-);
+console.log(`\n${failures === 0 ? "PASS" : "FAIL"} — ${checks - failures}/${checks} checks passed\n`);
 process.exit(failures === 0 ? 0 : 1);

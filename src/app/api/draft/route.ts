@@ -1,8 +1,9 @@
 /**
  * Person B — POST /api/draft
  *
- * Analysis in → assembled Deliverable out. Handles both recipes.
- * Output goes straight to C's /api/audit and then the review canvas.
+ * Analysis in → assembled Deliverable out. Recipe-agnostic: the engine picks the
+ * section list, so adding a recipe never touches this file.
+ * Output goes to C's /api/audit and then the review canvas.
  */
 
 import { z } from "zod";
@@ -14,13 +15,13 @@ import {
   Recipe,
 } from "@/lib/contracts";
 import { buildFeatureMatrix, rankDifferentiators } from "@/lib/prompts/analyze";
-import { draftBattlecard, draftInvestorUpdate } from "@/lib/prompts/draft";
+import { draftRecipe } from "@/lib/prompts/draft";
 import {
   SAMPLE_EVIDENCE,
   SAMPLE_PRICE_COMPARISONS,
 } from "@/lib/prompts/_dev/sample-evidence";
 
-// Six parallel section calls plus an assembly pass. Well past Vercel's default.
+// Parallel section calls plus an assembly pass. Well past Vercel's default.
 export const maxDuration = 90;
 export const runtime = "nodejs";
 
@@ -47,7 +48,7 @@ export async function POST(request: Request) {
         SAMPLE_EVIDENCE,
         featureMatrix,
       );
-      const deliverable = await draftBattlecard({
+      const deliverable = await draftRecipe("battlecard", {
         evidence: SAMPLE_EVIDENCE,
         featureMatrix,
         differentiators,
@@ -59,19 +60,13 @@ export async function POST(request: Request) {
 
     const body = RequestBody.parse(JSON.parse(raw));
 
-    const deliverable =
-      body.recipe === "investor_update"
-        ? await draftInvestorUpdate({
-            evidence: body.evidence,
-            subjectLabel: body.subject_label,
-          })
-        : await draftBattlecard({
-            evidence: body.evidence,
-            featureMatrix: body.feature_matrix,
-            differentiators: body.differentiators,
-            priceComparisons: body.price_comparisons,
-            subjectLabel: body.subject_label,
-          });
+    const deliverable = await draftRecipe(body.recipe, {
+      evidence: body.evidence,
+      subjectLabel: body.subject_label,
+      featureMatrix: body.feature_matrix,
+      differentiators: body.differentiators,
+      priceComparisons: body.price_comparisons,
+    });
 
     return Response.json({ ...deliverable, elapsed_ms: Date.now() - started });
   } catch (error) {

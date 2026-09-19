@@ -1,15 +1,11 @@
 /**
  * Person B — competitive analysis.
  *
- * B1 feature matrix  → FeatureRow[]
+ * B1 feature matrix        → FeatureRow[]
  * B2 differentiator ranker → Differentiator[]
  *
- * Spec: CADENCE-BUILD-SPEC.md §10.1 and §10.2.
- *
- * The evidence/pricing formatters live here rather than in a new shared module
- * because CLAUDE.md assigns `prompts/analyze.ts` and `prompts/draft.ts` to B but
- * `prompts/evidence.ts` to A — a new unassigned file in this directory would blur
- * that line. `draft.ts` imports them from here.
+ * Spec §10.1 and §10.2. Both run before drafting; their output is the engine's
+ * input. Formatters and shared prompt fragments live in `shared.ts`.
  */
 
 import {
@@ -18,77 +14,12 @@ import {
   type Differentiator,
   type Evidence,
   type FeatureRow,
-  type PriceComparison,
 } from "@/lib/contracts";
 import { callClaude } from "./_dev/call-claude";
+import { formatEvidence, JSON_ONLY } from "./shared";
 
 // ---------------------------------------------------------------------------
-// Formatters — shared with draft.ts
-// ---------------------------------------------------------------------------
-
-/**
- * Render evidence for a prompt. Compact on purpose: the verbatim quote is the
- * part that matters, and padding the context with JSON punctuation costs tokens
- * on every one of the eight calls in a run.
- */
-export function formatEvidence(evidence: Evidence[]): string {
-  if (evidence.length === 0) return "(no evidence available)";
-
-  return evidence
-    .map((item) => {
-      const stale = isStale(item.fetched_at) ? " [STALE]" : "";
-      const weak = item.confidence < 0.6 ? " [LOW CONFIDENCE]" : "";
-      return [
-        `${item.id} (${item.recipe_role}, ${item.type})${stale}${weak}`,
-        `  source: ${item.source_label}`,
-        `  quote: "${item.quote}"`,
-        `  summary: ${item.summary}`,
-      ].join("\n");
-    })
-    .join("\n\n");
-}
-
-/**
- * Render the pricing table for B4. Every number the model is permitted to say
- * appears here and nowhere else.
- */
-export function formatPriceComparisons(comparisons: PriceComparison[]): string {
-  if (comparisons.length === 0) {
-    return "(no pricing comparison available — do not state any price)";
-  }
-
-  return comparisons
-    .map((row) => {
-      const ours = row.normalized_monthly_per_seat_ours;
-      const theirs = row.normalized_monthly_per_seat_theirs;
-      return [
-        `${row.our_tier} vs ${row.their_tier}`,
-        `  ours: ${ours === null ? "unknown" : `$${ours}/seat/month`}`,
-        `  theirs: ${theirs === null ? "unknown" : `$${theirs}/seat/month`}`,
-        `  delta_abs: ${row.delta_abs === null ? "unknown" : `$${row.delta_abs}`}`,
-        `  delta_pct: ${row.delta_pct === null ? "unknown" : `${row.delta_pct}%`}`,
-        `  cheaper: ${row.cheaper}`,
-        `  caveat: ${row.caveat ?? "none"}`,
-      ].join("\n");
-    })
-    .join("\n\n");
-}
-
-/** Competitor pricing pages change. 30 days is the spec's staleness line (§11.2). */
-function isStale(fetchedAt: string | null): boolean {
-  if (!fetchedAt) return false;
-  const fetched = Date.parse(fetchedAt);
-  if (Number.isNaN(fetched)) return false;
-  const thirtyDays = 30 * 24 * 60 * 60 * 1000;
-  return Date.now() - fetched > thirtyDays;
-}
-
-/** Shared tail — the retry in callClaude is a backstop, not the first line of defence. */
-const JSON_ONLY =
-  "Return only the JSON described above. No preamble, no explanation, no markdown fences, no trailing commentary.";
-
-// ---------------------------------------------------------------------------
-// B1 — feature matrix
+// B1 — feature matrix (§10.1)
 // ---------------------------------------------------------------------------
 
 export const FEATURE_MATRIX_SYSTEM = `You align product capabilities across two companies into one comparison table for a sales battlecard.
@@ -124,7 +55,7 @@ export async function buildFeatureMatrix(
 }
 
 // ---------------------------------------------------------------------------
-// B2 — differentiator ranker
+// B2 — differentiator ranker (§10.2)
 // ---------------------------------------------------------------------------
 
 export const DIFFERENTIATOR_SYSTEM = `You score competitive differences by how much each one should shape one specific sales conversation.
