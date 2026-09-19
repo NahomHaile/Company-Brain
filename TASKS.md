@@ -31,8 +31,8 @@ Only edit **your own** person's section, plus the shared gates at the top.
 - [x] `src/lib/anthropic.ts` — client, `callClaude()`, JSON-only enforcement, fence stripping, one retry, Zod validation
 - [ ] **Verify the model ID resolves with one live call** (see CLAUDE.md — spec's `claude-sonnet-4-6` is unconfirmed)
 - [x] `src/lib/fetch-page.ts` — robots.txt check, identifying UA, cheerio extract, 1 req/sec, cache
-- [ ] `src/lib/prompts/evidence.ts` — A2 evidence extractor → `Evidence[]`
-- [ ] A3 pricing extractor → `PriceTier[]`
+- [x] `src/lib/prompts/evidence.ts` — A2 evidence extractor → `Evidence[]`
+- [x] A3 pricing extractor → `PriceTier[]`
 - [x] `src/lib/pricing.ts` — deterministic comparison, **no model**
 - [x] Number verifier — regex every number out of generated narrative, assert membership in the pricing table
 - [ ] `src/app/api/fetch/route.ts`
