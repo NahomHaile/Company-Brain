@@ -10,6 +10,12 @@ import { Deliverable, EvidenceArray } from "../contracts.ts";
 import type { Evidence } from "../contracts.ts";
 import { SAMPLE_DELIVERABLE, SAMPLE_EVIDENCE } from "./sample-deliverable.ts";
 
+// Fully literal paths. Building these from spread arguments defeats Turbopack's
+// static analysis, which then traces the whole project into the serverless
+// bundle — a slow deploy at best, a size-limit failure at worst.
+const BATTLECARD_PATH = join(process.cwd(), "data", "fixtures", "battlecard.json");
+const EVIDENCE_PATH = join(process.cwd(), "data", "fixtures", "evidence.json");
+
 export type LoadedDeliverable = {
   deliverable: Deliverable;
   evidence: Evidence[];
@@ -18,10 +24,6 @@ export type LoadedDeliverable = {
   /** Newest fetched_at across the evidence, for the CACHED badge. */
   fetchedAt: string | null;
 };
-
-function readJson(...segments: string[]): unknown {
-  return JSON.parse(readFileSync(join(process.cwd(), ...segments), "utf8"));
-}
 
 function newestFetch(evidence: Evidence[]): string | null {
   const stamps = evidence
@@ -33,7 +35,7 @@ function newestFetch(evidence: Evidence[]): string | null {
 
 export function loadDeliverable(): LoadedDeliverable {
   try {
-    const raw = readJson("data", "fixtures", "battlecard.json");
+    const raw: unknown = JSON.parse(readFileSync(BATTLECARD_PATH, "utf8"));
     const deliverable = Deliverable.parse(raw);
 
     // Prefer evidence embedded in the deliverable; fall back to the separate
@@ -41,7 +43,7 @@ export function loadDeliverable(): LoadedDeliverable {
     // is what makes Person D's `?demo=cached` run show real provenance.
     const embedded = (raw as { evidence?: unknown }).evidence;
     const evidence = EvidenceArray.parse(
-      embedded ?? readJson("data", "fixtures", "evidence.json"),
+      embedded ?? JSON.parse(readFileSync(EVIDENCE_PATH, "utf8")),
     );
 
     return {
