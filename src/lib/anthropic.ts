@@ -105,6 +105,15 @@ export interface CallClaudeOptions<T> {
   model?: string;
   /** Label for logs. Makes a 2:45 integration failure traceable to a prompt. */
   label?: string;
+  /**
+   * Per-call HTTP timeout in ms. Defaults to the SDK's own (10 minutes).
+   *
+   * Callers that fan out want a short one — a single hung section must not eat
+   * the whole parallel budget and push the route past its maxDuration. Callers
+   * doing one long generation (assembly rewrites the entire document) want a
+   * long one. One global value cannot serve both.
+   */
+  timeoutMs?: number;
 }
 
 /**
@@ -123,6 +132,7 @@ export async function callClaude<T>(opts: CallClaudeOptions<T>): Promise<T> {
     maxTokens = 8000,
     model = MODEL_MAIN,
     label = "claude",
+    timeoutMs,
   } = opts;
 
   const anthropic = getClient();
@@ -132,12 +142,15 @@ export async function callClaude<T>(opts: CallClaudeOptions<T>): Promise<T> {
   let lastProblem = "";
 
   for (let attempt = 0; attempt < 2; attempt++) {
-    const response = await anthropic.messages.create({
-      model,
-      max_tokens: maxTokens,
-      system: `${system}\n\n${JSON_RULE}`,
-      messages,
-    });
+    const response = await anthropic.messages.create(
+      {
+        model,
+        max_tokens: maxTokens,
+        system: `${system}\n\n${JSON_RULE}`,
+        messages,
+      },
+      timeoutMs === undefined ? undefined : { timeout: timeoutMs },
+    );
 
     const raw = response.content
       .filter((block): block is Anthropic.TextBlock => block.type === "text")
