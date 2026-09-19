@@ -60,33 +60,43 @@ Only edit **your own** person's section, plus the shared gates at the top.
 **The canvas is the product surface. Build it entirely against `battlecard.json`.**
 
 - [x] `ReviewCanvas.tsx` against fixture `Deliverable` — zero dependency on B
-- [x] `ProvenancePopover.tsx` — hover a sentence → verbatim `quote` + `source_url`. **Best five seconds of the demo. Make it instant.**
-- [x] `RiskFlag.tsx` — inline highlight in the text, **not** a sidebar; click → category, why, suggested alternative, Approve / Redact
+- [x] `ProvenancePopover.tsx` — hover a sentence → verbatim `quote` + `source_url`
+- [x] `RiskFlag.tsx` — inline highlight in the text, **not** a sidebar
 - [x] Unsourced sentences get a visible warning treatment
 - [x] C1 de-robotify → `Deliverable`
 - [x] C2 grounding auditor → `GroundingIssue[]`
 - [x] C3 risk flagger → `RiskFlag[]`
-- [!] `src/app/api/audit/route.ts` — run grounding + risk in parallel *(**blocked on A**: needs `src/lib/anthropic.ts` + `callClaude`. Prompts are done and pushed; the route is ~15 min once the client lands.)*
+- [x] **Audit pipeline** — C1 → `Promise.all([C2, C3])` → `verifyNumbers`, fully tested
+- [~] `src/app/api/audit/route.ts` — ~10-line shim, waiting on A's branch to be mergeable
 - [x] `src/app/review/page.tsx`
 - [x] Inline editing on any sentence
-- [ ] *(stretch, only if ahead at 2:45)* objection simulator
+- [ ] *(stretch)* objection simulator
 
-**C status — 2:22 PM · branch `ryan` · 27 unit tests green, typecheck clean, build clean.**
+**C status — 2:41 PM · branch `ryan` · 47 tests, lint, typecheck, build all clean.**
 
-Canvas is live at `/review`. Verified end-to-end in a real browser, not just typechecked:
-hover → verbatim quote + live source link · paste-sourced evidence renders no dead link ·
-redact heals the sentence and the flag count drops · editing a sentence moves an orphaned
-flag to a visible strip instead of deleting it · keyboard Tab+Enter opens provenance ·
-**investor-update recipe renders with zero canvas changes** (tested with a real
-`recipe: "investor_update"` deliverable; tables correctly disappear when empty).
+Canvas live at `/review`, verified end-to-end in a browser. **Tested against A's real
+fixtures on `origin/person-a`** — 6 sections, 25 sentences, 20 evidence, 4 flags,
+3 price rows. Parses, renders, no dangling evidence ids, every flag span matches.
 
-Built against a C-owned edge-case sample. Swaps to `data/fixtures/battlecard.json`
-automatically the moment A lands it — no code change, already tested against both.
+A's branch isn't mergeable yet, so the audit pipeline takes `callClaude` and
+`verifyNumbers` as **injected parameters** typed against A's real signatures. It is
+built and tested now; `route.ts` is a ten-line shim the moment `lib/anthropic` lands:
 
-**Three things the rest of you need:**
-1. **A — `Deliverable` has no `evidence` field.** `Sentence.evidence_ids` points at records the object doesn't carry, so provenance cannot resolve from a `Deliverable` alone. This also means D's `?demo=cached` run would show **zero** provenance — the feature the demo is built on. Please add `evidence: z.array(Evidence)`. The loader already reads it when present.
-2. **B — `FeatureMatrix.tsx` is yours**, but §11.4 #5 also assigns the matrix to C. The canvas leaves a `featureMatrix` slot; send me the prop signature so we don't both build a table. C renders `price_comparisons` (unassigned in the spec).
-3. **Everyone — this repo is Next 16 + shadcn v4 on Base UI, not Radix.** Popover/Dialog APIs differ from what §6 assumes. Two shared-file changes, both additive and build-verified: `allowImportingTsExtensions` in `tsconfig.json`, and the agent-rules block `next dev` appends to `CLAUDE.md`.
+```ts
+const audited = await runAudit({
+  deliverable, evidence,
+  callClaude,      // from @/lib/anthropic
+  verifyNumbers,   // from @/lib/pricing
+});
+return NextResponse.json(audited);
+```
+
+**Still needed from the rest of you:**
+1. **A — `Deliverable` still has no `evidence` field**, and `battlecard.json` doesn't embed it. Provenance works today because C falls back to `evidence.json`, but **D's `?demo=cached` single-file run will show zero receipts**. One line: `evidence: z.array(Evidence)`.
+2. **A — `battlecard.json` says `word_count: 612`; the card has 599 words.** C now recomputes on load rather than trusting the field, so the UI is right either way, but the fixture literal is still wrong.
+3. **B — send the `<FeatureMatrix />` prop signature.** Canvas has the slot. C renders `price_comparisons` (unassigned in the spec).
+4. **D — read the reviewed deliverable from C's state, not the draft.** `RiskFlag.status` records the decision but not its effect on the text, so C holds the final copy. One shared CACHED badge component, please.
+5. **Everyone — Next 16 + shadcn v4 on Base UI, not Radix.** A's `MODEL_MAIN` is `claude-sonnet-5`, so the spec's unverified `claude-sonnet-4-6` is settled.
 
 ## Person D — Shell, Export, Integration, Demo
 
