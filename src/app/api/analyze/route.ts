@@ -8,6 +8,7 @@
 import { z } from "zod";
 import { EvidenceArray } from "@/lib/contracts";
 import { buildFeatureMatrix, rankDifferentiators } from "@/lib/prompts/analyze";
+import { ModelOutputError } from "@/lib/prompts/_dev/call-claude";
 import { SAMPLE_EVIDENCE } from "@/lib/prompts/_dev/sample-evidence";
 
 // The matrix and ranker are two sequential model calls. Vercel's default
@@ -52,6 +53,14 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     console.error("[api/analyze]", error);
+
+    // 502, not 422: the upstream model failed, the caller's request was fine.
+    if (error instanceof ModelOutputError) {
+      return Response.json(
+        { error: "model_output_invalid", detail: error.message, issues: error.issues },
+        { status: 502 },
+      );
+    }
 
     if (error instanceof z.ZodError) {
       return Response.json(

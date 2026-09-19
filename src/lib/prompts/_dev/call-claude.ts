@@ -22,6 +22,25 @@ import Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
 
 /**
+ * Raised when the MODEL produced output that failed schema validation.
+ *
+ * Distinct from a bare ZodError, which a route also gets when the CALLER sends
+ * a malformed body. Without this the two are indistinguishable and a caller
+ * debugs their own payload while chasing a model problem.
+ */
+export class ModelOutputError extends Error {
+  readonly issues: z.ZodIssue[];
+  readonly raw: string;
+
+  constructor(message: string, issues: z.ZodIssue[], raw: string) {
+    super(message);
+    this.name = "ModelOutputError";
+    this.issues = issues;
+    this.raw = raw;
+  }
+}
+
+/**
  * Degradation chain, tried in order.
  *
  * Spec §6 pins `claude-sonnet-4-6`. That ID resolves, but `claude-sonnet-5` is
@@ -165,6 +184,19 @@ export async function callClaude<T>(opts: {
       ],
       maxTokens,
     );
-    return schema.parse(JSON.parse(stripFences(retry)));
+
+    try {
+      return schema.parse(JSON.parse(stripFences(retry)));
+    } catch (error) {
+      // Rethrow as ModelOutputError so callers can tell "the model failed"
+      // apart from "the caller sent a bad body" — both are ZodError otherwise.
+      throw new ModelOutputError(
+        `model output failed schema validation after one retry: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+        error instanceof z.ZodError ? error.issues : [],
+        retry.slice(0, 2000),
+      );
+    }
   }
 }

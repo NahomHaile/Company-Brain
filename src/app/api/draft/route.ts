@@ -16,6 +16,7 @@ import {
 } from "@/lib/contracts";
 import { buildFeatureMatrix, rankDifferentiators } from "@/lib/prompts/analyze";
 import { draftRecipe } from "@/lib/prompts/draft";
+import { ModelOutputError } from "@/lib/prompts/_dev/call-claude";
 import {
   SAMPLE_EVIDENCE,
   SAMPLE_PRICE_COMPARISONS,
@@ -44,22 +45,41 @@ export async function POST(request: Request) {
     // by accident: an empty or malformed POST from the UI silently returning
     // synthetic Thicket/VetFlow data as though it were a live result is the
     // worst failure available under the §4 honesty contract.
-    if (new URL(request.url).searchParams.get("dev") === "1") {
-      const featureMatrix = await buildFeatureMatrix(SAMPLE_EVIDENCE);
-      const differentiators = await rankDifferentiators(
-        SAMPLE_EVIDENCE,
-        featureMatrix,
-      );
-      const result = await draftRecipe("battlecard", {
+    const params = new URL(request.url).searchParams;
+    if (params.get("dev") === "1") {
+      // ?recipe= so the investor-update path is reachable too; without it the
+      // second recipe has no route-level coverage at all.
+      const devRecipe = Recipe.catch("battlecard").parse(params.get("recipe"));
+
+      const analysis =
+        devRecipe === "battlecard"
+          ? await (async () => {
+              const featureMatrix = await buildFeatureMatrix(SAMPLE_EVIDENCE);
+              return {
+                featureMatrix,
+                differentiators: await rankDifferentiators(
+                  SAMPLE_EVIDENCE,
+                  featureMatrix,
+                ),
+                priceComparisons: SAMPLE_PRICE_COMPARISONS,
+              };
+            })()
+          : {};
+
+      const result = await draftRecipe(devRecipe, {
         evidence: SAMPLE_EVIDENCE,
-        featureMatrix,
-        differentiators,
-        priceComparisons: SAMPLE_PRICE_COMPARISONS,
-        subjectLabel: "Thicket vs. VetFlow — for Brookside Animal Hospital",
+        subjectLabel:
+          devRecipe === "battlecard"
+            ? "Thicket vs. VetFlow — for Brookside Animal Hospital"
+            : "Thicket — September 2026 investor update",
+        ...analysis,
       });
+
       return Response.json({
         ...result.deliverable,
         synthetic: true, // the UI must badge this — §4
+        degraded: result.degraded,
+        missing_sections: result.missingSections,
         warnings: result.warnings,
         timings: result.timings,
         elapsed_ms: Date.now() - started,
@@ -85,12 +105,24 @@ export async function POST(request: Request) {
 
     return Response.json({
       ...result.deliverable,
+      degraded: result.degraded,
+      missing_sections: result.missingSections,
       warnings: result.warnings,
       timings: result.timings,
       elapsed_ms: Date.now() - started,
     });
   } catch (error) {
     console.error("[api/draft]", error);
+
+    // 502, not 422: the upstream model failed, the caller's request was fine.
+    // Both surface as ZodError otherwise, which sends the caller debugging
+    // their own payload for a problem they did not cause.
+    if (error instanceof ModelOutputError) {
+      return Response.json(
+        { error: "model_output_invalid", detail: error.message, issues: error.issues },
+        { status: 502 },
+      );
+    }
 
     if (error instanceof z.ZodError) {
       return Response.json(

@@ -48,6 +48,17 @@ export interface DraftResult {
   deliverable: Deliverable;
   warnings: string[];
   timings: Record<string, number>;
+  /**
+   * Section keys the recipe defines but the run failed to produce.
+   *
+   * The Deliverable contract has no field for this, and a short `sections`
+   * array is indistinguishable from a complete one — so a degraded card would
+   * render as a whole card. §4 requires degraded output be labelled, not
+   * quietly smaller, so this rides alongside for the UI to badge.
+   */
+  missingSections: string[];
+  /** True when anything degraded. The UI must show something when this is set. */
+  degraded: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -268,6 +279,7 @@ export async function runRecipe<K extends string>(
   timings.fan_out_total = Date.now() - fanOutStarted;
 
   const drafted: Section[] = [];
+  const missingSections: string[] = [];
   settled.forEach((result, index) => {
     if (result.status === "fulfilled") {
       drafted.push(result.value);
@@ -277,6 +289,7 @@ export async function runRecipe<K extends string>(
     const reason =
       result.reason instanceof Error ? result.reason.message : String(result.reason);
     console.error(`[draft] section "${key}" failed:`, result.reason);
+    missingSections.push(key);
     warnings.push(`section "${key}" failed and was omitted: ${reason}`);
   });
 
@@ -333,7 +346,12 @@ export async function runRecipe<K extends string>(
   }
 
   const wordCount = countWords(cleaned);
-  if (wordCount > WORD_TARGET.max || wordCount < WORD_TARGET.min) {
+  // Only meaningful on a complete run. On a partial one the count is naturally
+  // low, and a spurious warning here buries the real one about the failed section.
+  if (
+    missingSections.length === 0 &&
+    (wordCount > WORD_TARGET.max || wordCount < WORD_TARGET.min)
+  ) {
     warnings.push(
       `word count ${wordCount} is outside the ${WORD_TARGET.min}-${WORD_TARGET.max} target`,
     );
@@ -355,6 +373,8 @@ export async function runRecipe<K extends string>(
     },
     warnings,
     timings,
+    missingSections,
+    degraded: warnings.length > 0,
   };
 }
 
