@@ -10,8 +10,8 @@ import {
   Deliverable,
   GroundingIssueArray,
   RiskFlagArray,
-} from "@/lib/contracts";
-import type { Evidence } from "@/lib/contracts";
+} from "../contracts.ts";
+import type { Evidence } from "../contracts.ts";
 
 /** Spec 11.1. "Sound natural" does nothing; the banned constructions are the point. */
 export const C1_DEROBOTIFY = `Rewrite this deliverable to remove machine-written tells while preserving meaning and every evidence ID.
