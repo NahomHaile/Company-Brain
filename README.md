@@ -4,8 +4,10 @@
 
 **The sales hire an early founder can't afford yet.**
 
-Two URLs in. A competitor battlecard out — in about thirty seconds, with a verbatim
+Two URLs in. A competitor battlecard out — in a couple of minutes, with a verbatim
 receipt behind every single sentence.
+
+**▶ Live: https://company-brain-git-ryan-nahomhaile.vercel.app/**
 
 `Chatathon 2026` · `Track 01 — Misneach` · `Northeastern`
 
@@ -14,8 +16,9 @@ receipt behind every single sentence.
 ---
 
 Maya takes six to nine discovery calls a week and spends **45–70 minutes preparing for each
-one**. Cadence does that prep in thirty seconds and hands her something she can defend on a
-live call — every claim traceable to a quote, every risky phrase flagged before she says it
+one**. Cadence turns that into roughly six minutes — a couple of minutes of generation she
+walks away from, then a few minutes of review — and hands her something she can defend on a
+live call: every claim traceable to a quote, every risky phrase flagged before she says it
 out loud.
 
 The part that matters isn't the drafting. It's that **she stays in control of every word**.
@@ -43,6 +46,82 @@ this specific prospect* and *knowing what to say when the competitor comes up*. 
 dumps a feature list solves the easy fifteen minutes. So Cadence spends its effort on the pivot
 points — the lines Maya says out loud when a prospect mentions a competitor — and on making every
 one of them defensible.
+
+---
+
+## Persona, bottleneck, and what it's worth
+
+Named explicitly, because naming both is an eligibility requirement for this track.
+
+|  |  |
+|---|---|
+| **Founder persona** | **Maya Okonkwo** — the solo, non-technical founder of **Thicket**, a seed-stage company selling scheduling software to independent veterinary clinics. Roughly $41K MRR, six employees, **no SDR and no sales engineer**. She sells the product herself. |
+| **The bottleneck** | **Competitive call prep.** Six to nine discovery calls a week, 45–70 minutes of preparation each — reading the prospect's site, re-reading a competitor's pricing page, and deciding what to say when that competitor comes up. **Five to nine hours a week**, every week, on work that is not building the product. |
+
+### Why this bottleneck and not another
+
+Maya's constraint is not that she lacks information. It is that the information is scattered
+across two websites and her own memory, and the part that decides whether the call goes well —
+*what do I say when they bring up VetFlow?* — is the part she has to rebuild from scratch every
+time. It is the highest-frequency, lowest-leverage hour in her week, it is the exact job the
+hire she can't afford would do, and it is repetitive enough to be worth automating and
+consequential enough that she cannot accept an unverifiable answer.
+
+### The arithmetic
+
+|  | Before | With Cadence |
+|---|---|---|
+| Per call | 45–70 min of prep | ~2 min generating (she walks away) + ~4 min reviewing |
+| Per week, 6–9 calls | **5–9 hours** | **under 1 hour** |
+| Reclaimed | — | **≈ 4–8 hours a week** |
+| Over a year (48 weeks) | — | **≈ 200–380 hours**, or 5–9 working weeks |
+| The alternative | An SDR at **$60–70K** fully loaded | API tokens — an estimated **$0.30–0.60 per battlecard** |
+
+At six to nine cards a week that is **well under $20 a month in model spend** against a
+five-figure-a-quarter hire. Even at the pessimistic end, the thing Cadence replaces costs
+roughly a thousand times what running Cadence does.
+
+### How honest are these numbers
+
+Stated plainly, because a number you can't source is worth less than no number:
+
+- **Measured by us.** The audit stage — de-robotify, then grounding and risk in parallel, then
+  the deterministic number check — runs **~134 seconds** against the six-section fixture
+  battlecard. That is a real timing off a real run, and it is why we say "a couple of minutes"
+  rather than the thirty seconds an earlier draft of this README claimed.
+- **Estimated from observed token volumes**, not from a metered invoice: the $0.30–0.60 per
+  card. A full run is roughly 60–120K tokens across five routes.
+- **Persona research, not a measured study.** The 45–70 minutes per call and the 6–9 calls per
+  week. These describe Maya, who is synthetic. We have not timed a real founder.
+- **Public market data.** The $60–70K fully loaded SDR cost.
+
+The reclaimed-hours figures follow arithmetically from the persona estimates, so they inherit
+that uncertainty. We would rather show the derivation than quote a single confident number.
+
+---
+
+## The workflow, for a founder who never opens a terminal
+
+Maya is non-technical. The entire path is a browser, and there is no install, no API key and no
+config file anywhere in it.
+
+1. **Open the link.** <https://company-brain-git-ryan-nahomhaile.vercel.app/> — nothing to set up.
+2. **Paste two URLs.** The prospect's website and the competitor's pricing page. Press
+   **Generate battlecard**. (No URLs handy? **Run the demo** loads a cached pair and says so
+   on screen.)
+3. **Walk away for two minutes.** Six named stages light up as they finish, so she can see
+   it is working rather than guessing at a spinner.
+4. **Review it — this is the actual product.** The card opens with every sentence clickable.
+   Click any sentence to see the verbatim quote and the source URL it came from. Sentences with
+   no evidence behind them are visibly marked rather than quietly shipped.
+5. **Deal with the flags.** Anything risky — an absolute claim, a stale price, a swipe at the
+   competitor — is highlighted in place with a plain-English reason and a suggested rewrite.
+   She **approves or redacts each one**. Cadence never silently rewrites her words.
+6. **Edit anything.** Click any sentence and type. It's her card.
+7. **Print or save to PDF** and take it into the call.
+
+Step 5 is the part that makes this defensible rather than merely fast. Maya walks into the call
+knowing which claims are solid, which are soft, and which she decided to cut — and *why*.
 
 ---
 
