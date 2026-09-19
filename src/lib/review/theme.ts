@@ -1,41 +1,42 @@
-// Review canvas palette and type.
+// Review canvas design tokens — see CADENCE-DESIGN-DIRECTION.md §3, §4.
 //
-// The palette encodes epistemic state, not decoration: a sentence is sourced,
-// unsourced, or risky. Sourced sentences get NO treatment — the default is
-// quiet so that only problems are visible. Decorate everything and nothing
-// reads as a warning.
+// The artifact is a scouting report Maya opens thirty seconds before a call and
+// scans under mild pressure, not a SaaS dashboard. Printed prep sheet, marked
+// up by hand. White paper, no dark mode, no card grid.
 //
-//   paper      #FCFCFA   document surface
-//   ink        #1A1A17   body text
-//   rule       #E3E2DC   hairlines and section dividers
-//   receipt    #2F6F5E   provenance popover only, never in body text
-//   unsourced  #B3701A   dotted underline on unsourced claims
-//   risk       #A33A4A   inline highlight on risky spans
+//   paper   #FFFFFF   a prep sheet is printed
+//   ink     #14171A   body text
+//   rule    #D7D3CA   hairlines, printed-form grey
+//   marker  #F2E85C   highlighter — risk-flagged spans
+//   stamp   #9E3320   oxidised red — severity and proofreader's marks
+//   pencil  #6B7076   provenance underlines, margin notes
 //
-// These are written as literal Tailwind arbitrary values at each use site
-// (text-[#1A1A17]) rather than CSS variables, for two reasons: Tailwind only
-// scans literal class strings, and Base UI portals popovers to document.body
-// where variables scoped to the page wrapper would not reach them.
+// Written as literal Tailwind arbitrary values at each use site rather than CSS
+// variables, for two reasons: Tailwind only scans literal class strings, and
+// Base UI portals popovers to document.body where variables scoped to the page
+// wrapper would never reach them.
 //
-// Risk severity is encoded structurally, not chromatically — one hue, varying
-// underline weight. A three-colour traffic light reads as generic.
-import { Source_Serif_4 } from "next/font/google";
+// The three overlays are the three ways a person marks up a printed page —
+// highlighter, pencil, proofreader's stamp. One coherent world, instantly
+// legible, which is what makes it read as intent rather than Tailwind defaults.
+import { Newsreader, Public_Sans } from "next/font/google";
 
 /**
- * The deliverable is printed and read aloud before a call, so its prose is set
- * in a document serif. Interface chrome stays in Geist (loaded in layout.tsx).
+ * The spoken column. Pivots, landmines, positioning — language Maya says out
+ * loud on a call, so it is set large enough to read at a glance.
  *
- * Apply `prose.className` directly to portalled content — inheritance does not
- * cross a portal boundary.
+ * Apply `.className` directly to portalled content; inheritance does not cross
+ * a portal boundary.
  */
-export const prose = Source_Serif_4({
+export const spoken = Newsreader({
   subsets: ["latin"],
+  weight: ["400", "500"],
   display: "swap",
 });
 
-/** Severity → underline treatment. One hue; weight carries the signal. */
-export const riskUnderline = {
-  low: "underline decoration-dotted decoration-1 underline-offset-4 decoration-[#A33A4A]",
-  medium: "underline decoration-solid decoration-2 underline-offset-4 decoration-[#A33A4A]",
-  high: "underline decoration-solid decoration-2 underline-offset-4 decoration-[#A33A4A] bg-[#A33A4A]/12",
-} as const;
+/** Interface, tables, labels — the reference column she glances at. */
+export const ui = Public_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  display: "swap",
+});

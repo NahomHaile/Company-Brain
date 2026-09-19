@@ -58,6 +58,10 @@ export async function runAudit({
     system: C1_DEROBOTIFY,
     user: buildDerobotifyInput(deliverable),
     schema: C1_SCHEMA,
+    // C1 re-emits every sentence it was given, so its output is as large as
+    // the draft. The 8000 default truncates a six-section battlecard, and
+    // callClaude treats truncation as fatal rather than retrying.
+    maxTokens: 16000,
     label: "C1 de-robotify",
   });
 

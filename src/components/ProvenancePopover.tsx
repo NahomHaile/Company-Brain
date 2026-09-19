@@ -8,7 +8,8 @@ import {
 } from "@/components/ui/popover";
 import type { Evidence } from "@/lib/contracts";
 import { isStale } from "@/lib/review/evidence";
-import { prose } from "@/lib/review/theme";
+import { spoken, ui } from "@/lib/review/theme";
+import styles from "./review-canvas.module.css";
 
 function formatFetched(iso: string): string {
   return new Date(iso).toLocaleDateString("en-US", {
@@ -24,28 +25,30 @@ function Receipt({ item }: { item: Evidence }) {
   const stale = isStale(item.fetched_at);
   return (
     <figure className="flex flex-col gap-2">
-      {/* The verbatim quote is the product. It leads, set in the serif. */}
+      {/* The verbatim quote is the product. It leads, set in the spoken face. */}
       <blockquote
-        className={`${prose.className} text-[15px] leading-relaxed text-[#1A1A17]`}
+        className={`${spoken.className} text-[15px] leading-relaxed text-[#14171A]`}
       >
         {item.quote}
       </blockquote>
-      <figcaption className="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-xs">
+      <figcaption
+        className={`${ui.className} flex flex-wrap items-baseline gap-x-2 gap-y-1 text-[11px]`}
+      >
         {item.source_url ? (
           <a
             href={item.source_url}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[#2F6F5E] underline underline-offset-2 hover:no-underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2F6F5E]"
+            className="text-[#6B7076] underline underline-offset-2 hover:text-[#14171A] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#6B7076]"
           >
             {item.source_label}
           </a>
         ) : (
           // Pasted evidence has no URL. Render the label, never a dead link.
-          <span className="text-[#1A1A17]/60">{item.source_label}</span>
+          <span className="text-[#6B7076]">{item.source_label}</span>
         )}
         {item.fetched_at && (
-          <span className={stale ? "text-[#B3701A]" : "text-[#1A1A17]/45"}>
+          <span className={stale ? "text-[#9E3320]" : "text-[#6B7076]"}>
             {stale
               ? `fetched ${formatFetched(item.fetched_at)} — may have changed`
               : `fetched ${formatFetched(item.fetched_at)}`}
@@ -57,14 +60,14 @@ function Receipt({ item }: { item: Evidence }) {
 }
 
 /**
- * Hover any sentence to see the verbatim evidence behind it (spec 11.4 #1).
+ * Hover any sentence to see the verbatim evidence behind it.
  *
- * Opens with no delay — Base UI's default is 300ms, which reads as lag. The
- * trigger renders as a span so it sits inside flowing prose rather than
- * breaking the line as a button would.
+ * The dotted pencil underline is the affordance, not decoration: an unmarked
+ * sentence advertises nothing, and a reader has no reason to hover it. Opens
+ * with no delay — Base UI's default 300ms reads as lag.
  *
- * Renders children bare when there is no evidence: an unsourced sentence gets
- * the warning treatment from the canvas instead of an empty popover.
+ * Renders children bare when there is no evidence; an unsourced sentence gets
+ * the proofreader's mark from the canvas instead of an empty popover.
  */
 export function ProvenancePopover({
   evidence,
@@ -83,18 +86,19 @@ export function ProvenancePopover({
         closeDelay={80}
         nativeButton={false}
         render={<span />}
-        className="cursor-help rounded-xs transition-colors data-[popup-open]:bg-[#2F6F5E]/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2F6F5E]"
+        className={styles.sourced}
       >
         {children}
       </PopoverTrigger>
+      {/* Styled as a margin note: hairline, no shadow theatre, paper ground. */}
       <PopoverContent
         side="top"
         sideOffset={8}
-        className="w-[min(26rem,calc(100vw-2rem))] gap-3 border-t-2 border-t-[#2F6F5E] bg-[#FCFCFA] p-4"
+        className="w-[min(26rem,calc(100vw-2rem))] gap-3 rounded-none border-l-2 border-l-[#6B7076] bg-white p-4 shadow-sm ring-1 ring-[#D7D3CA]"
       >
         {evidence.map((item, i) => (
           <div key={item.id} className="flex flex-col gap-3">
-            {i > 0 && <hr className="border-[#E3E2DC]" />}
+            {i > 0 && <hr className="border-[#D7D3CA]" />}
             <Receipt item={item} />
           </div>
         ))}
