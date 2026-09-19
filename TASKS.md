@@ -59,17 +59,25 @@ Only edit **your own** person's section, plus the shared gates at the top.
 
 **The canvas is the product surface. Build it entirely against `battlecard.json`.**
 
-- [ ] `ReviewCanvas.tsx` against fixture `Deliverable` — zero dependency on B
-- [ ] `ProvenancePopover.tsx` — hover a sentence → verbatim `quote` + `source_url`. **Best five seconds of the demo. Make it instant.**
-- [ ] `RiskFlag.tsx` — inline highlight in the text, **not** a sidebar; click → category, why, suggested alternative, Approve / Redact
-- [ ] Unsourced sentences get a visible warning treatment
+- [x] `ReviewCanvas.tsx` against fixture `Deliverable` — zero dependency on B
+- [x] `ProvenancePopover.tsx` — hover a sentence → verbatim `quote` + `source_url`. **Best five seconds of the demo. Make it instant.**
+- [x] `RiskFlag.tsx` — inline highlight in the text, **not** a sidebar; click → category, why, suggested alternative, Approve / Redact
+- [x] Unsourced sentences get a visible warning treatment
 - [ ] C1 de-robotify → `Deliverable`
 - [ ] C2 grounding auditor → `GroundingIssue[]`
 - [ ] C3 risk flagger → `RiskFlag[]`
-- [ ] `src/app/api/audit/route.ts` — run grounding + risk in parallel
-- [ ] `src/app/review/page.tsx`
-- [ ] Inline editing on any sentence
+- [!] `src/app/api/audit/route.ts` — run grounding + risk in parallel *(blocked: needs A's `src/lib/anthropic.ts` + `callClaude`; prompts land first, route after)*
+- [x] `src/app/review/page.tsx`
+- [x] Inline editing on any sentence
 - [ ] *(stretch, only if ahead at 2:45)*
+
+**C notes — 2:14 PM.** Canvas is live at `/review` on branch `ryan`, 27 unit tests green, build clean.
+Built against a C-owned edge-case sample; swaps to `data/fixtures/battlecard.json` automatically the moment A lands it, no code change.
+
+**Three things the rest of you need:**
+1. **A — `Deliverable` has no `evidence` field.** `Sentence.evidence_ids` points at records the object doesn't carry, so provenance can't resolve from a `Deliverable` alone. Also means D's `?demo=cached` run shows *zero* provenance. Please add `evidence: z.array(Evidence)`.
+2. **B — `FeatureMatrix.tsx` is yours**, but §11.4 #5 also assigns the matrix to C. Canvas leaves a slot; send me the prop signature so we don't both build a table. C renders `price_comparisons` (unassigned in the spec).
+3. **Everyone — the repo is Next 16 + shadcn v4 on Base UI, not Radix.** Popover/Dialog APIs differ from the spec's assumption. Also added `allowImportingTsExtensions` to `tsconfig.json` (additive, build verified).
 
 ## Person D — Shell, Export, Integration, Demo
 
