@@ -22,7 +22,9 @@ import {
   ASSEMBLY_SYSTEM,
   assemblyViolations,
   countWords,
+  numberSentences,
   REGISTRY,
+  rehydrate,
   stripDanglingCitations,
   withStableIds,
 } from "../draft";
@@ -222,9 +224,13 @@ ok("B3 rejects a generic pitch", says(POSITIONING_SYSTEM, "not a generic pitch")
 group("9. B9 assembly (§10.8)");
 // ===========================================================================
 
-ok("targets 350 to 550 words", says(ASSEMBLY_SYSTEM, "350 to 550"));
-ok("preserves evidence ids exactly", says(ASSEMBLY_SYSTEM, "preserve evidence ids exactly"));
-ok("spells out the merge rule", says(ASSEMBLY_SYSTEM, "union of both id arrays"));
+ok("tightens to a supplied word count", says(ASSEMBLY_SYSTEM, "tighten to the word count you are given"));
+// Assembly must never see evidence_ids — it kept losing them. It maps `from`
+// indices instead and code rebuilds provenance.
+ok("never asks the model to handle evidence_ids", !says(ASSEMBLY_SYSTEM, "evidence_ids"));
+ok("explains the merge case for `from`", says(ASSEMBLY_SYSTEM, '"from": [12, 13]'));
+ok("explains the split case for `from`", says(ASSEMBLY_SYSTEM, "both returned sentences"));
+ok("explains the cut case for `from`", says(ASSEMBLY_SYSTEM, "does not appear in your output"));
 ok("introduces no new facts", says(ASSEMBLY_SYSTEM, "do not introduce any new fact"));
 ok("forbids changing numbers", says(ASSEMBLY_SYSTEM, "do not change any number"));
 ok("removes cross-section repetition", says(ASSEMBLY_SYSTEM, "repetition"));
@@ -366,14 +372,13 @@ ok("clean assembly reports no violations", assemblyViolations(renamed, renamed).
 const droppedSection = renamed.slice(0, 5);
 ok("a dropped section is caught", assemblyViolations(renamed, droppedSection).length > 0);
 
-const lostCitation = renamed.map((s, i) =>
-  i === 0
-    ? { ...s, sentences: s.sentences.map((x) => ({ ...x, evidence_ids: [] })) }
-    : s,
-);
+const allCitationsGone = renamed.map((s) => ({
+  ...s,
+  sentences: s.sentences.map((x) => ({ ...x, evidence_ids: [] })),
+}));
 ok(
-  "a silently dropped citation is caught",
-  assemblyViolations(renamed, lostCitation).some((p) => p.includes("lost citations")),
+  "a document stripped of all provenance is caught",
+  assemblyViolations(renamed, allCitationsGone).some((p) => p.includes("no citations at all")),
 );
 
 const inventedCitation = renamed.map((s, i) =>
@@ -386,13 +391,70 @@ ok(
   assemblyViolations(renamed, inventedCitation).some((p) => p.includes("invented")),
 );
 
-const allRenamed = renamed.map((s) => ({
+// Most sentences ending up unsourced means the `from` mapping broke, even if
+// a few citations survived.
+const mostlyUnsourced = renamed.map((s, i) => ({
   ...s,
-  sentences: s.sentences.map((x, i) => ({ ...x, id: `zz_${i}` })),
+  sentences: s.sentences.map((x, j) => ({
+    ...x,
+    evidence_ids: i === 0 && j === 0 ? x.evidence_ids : [],
+  })),
 }));
 ok(
-  "wholesale id renaming is caught (would orphan C's flags)",
-  assemblyViolations(renamed, allRenamed).some((p) => p.includes("no sentence ids survived")),
+  "a mostly-unsourced result is caught",
+  assemblyViolations(renamed, mostlyUnsourced).some((p) => p.includes("have no citations")),
+);
+
+// --- the `from` mapping itself: provenance now depends entirely on it -------
+const src: Section[] = [
+  {
+    key: "positioning",
+    title: "Positioning",
+    sentences: [
+      { id: "positioning_s1", text: "Alpha.", evidence_ids: ["ev_001"] },
+      { id: "positioning_s2", text: "Beta.", evidence_ids: ["ev_002", "ev_003"] },
+    ],
+  },
+];
+const { numbered, flat } = numberSentences(src);
+ok("numberSentences numbers from 0", numbered[0].sentences[0].n === 0);
+ok("numberSentences strips evidence_ids from what the model sees", !JSON.stringify(numbered).includes("ev_001"));
+ok("numberSentences keeps a flat lookup", flat.length === 2);
+
+const merged = rehydrate(
+  [{ key: "positioning", title: "Positioning", sentences: [{ from: [0, 1], text: "Alpha and beta." }] }],
+  flat,
+);
+ok(
+  "merging unions both sources' citations",
+  ["ev_001", "ev_002", "ev_003"].every((id) => merged[0].sentences[0].evidence_ids.includes(id)),
+  merged[0].sentences[0].evidence_ids.join(", "),
+);
+
+const split = rehydrate(
+  [{ key: "positioning", title: "Positioning", sentences: [
+    { from: [1], text: "Beta one." },
+    { from: [1], text: "Beta two." },
+  ] }],
+  flat,
+);
+ok(
+  "splitting gives both halves the original citations",
+  split[0].sentences.every((x) => x.evidence_ids.length === 2),
+);
+ok("rehydrate re-ids sentences uniquely", split[0].sentences[0].id === "positioning_s1" && split[0].sentences[1].id === "positioning_s2");
+
+const outOfRange = rehydrate(
+  [{ key: "positioning", title: "Positioning", sentences: [{ from: [99], text: "Ghost." }] }],
+  flat,
+);
+ok(
+  "an out-of-range `from` yields no citation rather than a crash",
+  outOfRange[0].sentences[0].evidence_ids.length === 0,
+);
+ok(
+  "a citation cannot be invented by construction",
+  assemblyViolations(src, merged).every((p) => !p.includes("invented")),
 );
 
 // Dangling citations must never reach the canvas — a hover that resolves to

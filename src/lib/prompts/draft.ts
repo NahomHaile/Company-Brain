@@ -14,7 +14,7 @@
 
 import { z } from "zod";
 import {
-  Section as SectionSchema,
+
   Sentence as SentenceSchema,
   type Deliverable,
   type Evidence,
@@ -31,7 +31,7 @@ import type { RecipeDefinition, RecipeInput, SectionSpec } from "./recipes/types
 export type { RecipeInput } from "./recipes/types";
 
 const SentenceArray = z.array(SentenceSchema);
-const SectionArray = z.array(SectionSchema);
+
 
 /** Sections are short. The cap is a runaway guard, not a budget. */
 const DEFAULT_SECTION_TOKENS = 4096;
@@ -67,21 +67,27 @@ export interface DraftResult {
 
 export const ASSEMBLY_SYSTEM = `You are given several sections of a document, each drafted independently and therefore without knowledge of the others. Assemble them into one coherent piece.
 
+Every input sentence has a number. Your output references those numbers; you never handle citations yourself.
+
 Do this:
 - Remove cross-section repetition. A point made in the pivots should not restate the positioning paragraph. When two sections make the same point, keep it where it lands hardest and cut the other.
 - Fix transitions so the sections read as one document rather than six.
-- Tighten. Target 350 to 550 words total. This gets scanned in 90 seconds before a call, not read.
+- Tighten to the word count you are given. This gets scanned in 90 seconds before a call, not read.
 
 Do not do this:
 - Do not introduce any new fact, claim, number, or example that was not already in the text you were given.
 - Do not change any number.
 - Do not add, remove, or reorder sections. Return exactly the sections you were given, with the same "key" and "title" values.
 
-PRESERVE EVIDENCE IDS EXACTLY. This is the constraint most likely to be violated and the one that matters most. Every sentence keeps the evidence_ids it arrived with. If you merge two sentences, the merged sentence carries the union of both id arrays — never just the first one. If you split a sentence, both halves carry the original array. If you cut a sentence entirely, its ids disappear with it, which is fine. What is not fine is a surviving sentence that has quietly lost a citation.
+For every sentence you return, "from" lists the numbers of the input sentences it came from:
+- Kept a sentence more or less as-is → "from": [12]
+- Merged two sentences → "from": [12, 13]
+- Split one sentence into two → both returned sentences have "from": [12]
+- Cut a sentence → it simply does not appear in your output
 
-Keep each sentence's "id" as it arrived.
+Getting "from" right is the most important thing you do here. Provenance is rebuilt from those numbers, so a sentence with the wrong "from" ends up citing the wrong source, and an omitted number silently drops a citation.
 
-Return a JSON array of section objects with exactly these keys: key, title, sentences. Each sentence has exactly: id, text, evidence_ids.
+Return a JSON array of section objects with exactly these keys: key, title, sentences. Each sentence has exactly: from, text.
 
 ${JSON_ONLY}`;
 
@@ -175,41 +181,45 @@ export function assemblyViolations(
   const added = afterKeys.filter((k) => !beforeKeys.includes(k));
   if (added.length > 0) problems.push(`sections invented: ${added.join(", ")}`);
 
-  // A surviving sentence must not have lost citations.
-  const beforeSentences = new Map(
-    before.flatMap((s) => s.sentences).map((s) => [s.id, s]),
-  );
-  let survivors = 0;
-  for (const sentence of after.flatMap((s) => s.sentences)) {
-    const original = beforeSentences.get(sentence.id);
-    if (!original) continue;
-    survivors += 1;
-    const kept = new Set(sentence.evidence_ids);
-    const lost = original.evidence_ids.filter((id) => !kept.has(id));
-    if (lost.length > 0) {
-      problems.push(`${sentence.id} lost citations: ${lost.join(", ")}`);
-    }
-  }
-
-  // Zero survivors means every id was renamed — C's flags would attach to nothing.
-  if (survivors === 0 && beforeSentences.size > 0) {
-    problems.push("no sentence ids survived assembly (all renamed)");
-  }
-
-  // No citation may appear that was not in the input.
-  const knownIds = new Set(
+  // Per-sentence citation loss is no longer checkable here, and no longer
+  // needs to be: assembly does not handle evidence_ids at all now. It returns
+  // `from` indices and `rehydrate` computes the union from the originals, so a
+  // citation cannot be dropped or invented on a per-sentence basis.
+  //
+  // What can still go wrong is wholesale: the model returning `from: []`
+  // everywhere, or indices pointing nowhere, either of which strips the
+  // document of provenance while looking structurally fine.
+  const beforeIds = new Set(
     before.flatMap((s) => s.sentences).flatMap((s) => s.evidence_ids),
   );
-  const invented = [
-    ...new Set(
-      after
-        .flatMap((s) => s.sentences)
-        .flatMap((s) => s.evidence_ids)
-        .filter((id) => !knownIds.has(id)),
-    ),
-  ];
+  const afterIds = new Set(
+    after.flatMap((s) => s.sentences).flatMap((s) => s.evidence_ids),
+  );
+
+  const invented = [...afterIds].filter((id) => !beforeIds.has(id));
   if (invented.length > 0) {
     problems.push(`citations invented during assembly: ${invented.join(", ")}`);
+  }
+
+  if (beforeIds.size > 0 && afterIds.size === 0) {
+    problems.push("assembly returned no citations at all — `from` mapping failed");
+  }
+
+  // Cutting content legitimately drops some citations. Losing most of them
+  // means the mapping broke rather than the editing being aggressive.
+  const retained = [...beforeIds].filter((id) => afterIds.has(id)).length;
+  if (beforeIds.size >= 4 && retained / beforeIds.size < 0.5) {
+    problems.push(
+      `assembly retained only ${retained} of ${beforeIds.size} distinct citations`,
+    );
+  }
+
+  const unsourced = after
+    .flatMap((s) => s.sentences)
+    .filter((s) => s.evidence_ids.length === 0).length;
+  const total = after.flatMap((s) => s.sentences).length;
+  if (total > 0 && unsourced / total > 0.5) {
+    problems.push(`${unsourced} of ${total} assembled sentences have no citations`);
   }
 
   return problems;
@@ -237,6 +247,69 @@ async function draftSection(
   };
 }
 
+/**
+ * Assembly's output shape. Note what is absent: evidence_ids.
+ *
+ * The model used to carry citations through the rewrite and kept losing them —
+ * a live run dropped ids from five sentences, which tripped the contract check
+ * and cost us the tightened draft. Asking more firmly was not going to work:
+ * tracking a dozen id arrays while rewriting prose is the wrong job for it.
+ *
+ * So it never sees them. It references input sentences by number, and code
+ * rebuilds provenance from those numbers. A citation now cannot be lost or
+ * invented, only mapped — the same principle as §3.1 keeping arithmetic out of
+ * the model, applied to the thing the product actually sells.
+ */
+const AssembledSection = z.object({
+  key: z.string(),
+  title: z.string(),
+  sentences: z.array(
+    z.object({
+      from: z.array(z.number().int().min(0)),
+      text: z.string(),
+    }),
+  ),
+});
+export const AssembledSectionArray = z.array(AssembledSection);
+
+/** Flatten to numbered sentences so the model can reference them. */
+export function numberSentences(sections: Section[]) {
+  const flat: Sentence[] = [];
+  const numbered = sections.map((section) => ({
+    key: section.key,
+    title: section.title,
+    sentences: section.sentences.map((sentence) => {
+      flat.push(sentence);
+      return { n: flat.length - 1, text: sentence.text };
+    }),
+  }));
+  return { numbered, flat };
+}
+
+/** Rebuild provenance from the model's `from` numbers. */
+export function rehydrate(
+  assembled: z.infer<typeof AssembledSectionArray>,
+  flat: Sentence[],
+): Section[] {
+  return assembled.map((section) => ({
+    key: section.key,
+    title: section.title,
+    sentences: section.sentences.map((sentence, index) => {
+      // Union of every source sentence's citations. Out-of-range numbers are
+      // dropped rather than trusted — the model is not the authority here.
+      const ids = new Set<string>();
+      for (const n of sentence.from) {
+        for (const id of flat[n]?.evidence_ids ?? []) ids.add(id);
+      }
+      return {
+        id: `${section.key}_s${index + 1}`,
+        text: sentence.text,
+        evidence_ids: [...ids],
+      };
+    }),
+  }));
+}
+
 async function assemble(sections: Section[]): Promise<Section[]> {
   // Telling it the current count and the cut required is far more effective
   // than the target alone. A live run came back at 813 words against a 550
@@ -247,15 +320,19 @@ async function assemble(sections: Section[]): Promise<Section[]> {
       ? `The draft below is ${current} words. That is ${current - WORD_TARGET.max} over the ceiling. Cut it to between ${WORD_TARGET.min} and ${WORD_TARGET.max} words. This is the main thing you are being asked to do.`
       : `The draft below is ${current} words, already within the ${WORD_TARGET.min}-${WORD_TARGET.max} target. Do not pad it.`;
 
-  return callClaude({
+  const { numbered, flat } = numberSentences(sections);
+
+  const assembled = await callClaude({
     system: ASSEMBLY_SYSTEM,
-    user: `${instruction}\n\n${JSON.stringify(sections, null, 2)}`,
-    schema: SectionArray,
+    user: `${instruction}\n\n${JSON.stringify(numbered, null, 2)}`,
+    schema: AssembledSectionArray,
     maxTokens: 16000,
-    // Assembly rewrites the whole document. Sonnet timed out at 30s on a live
-    // run and fell through to Haiku, which took 108s and tightened poorly.
-    timeoutMs: 120_000,
+    // Assembly rewrites the whole document in one generation; a live run
+    // measured 80-139s. The section fan-out wants a much shorter leash.
+    timeoutMs: 180_000,
   });
+
+  return rehydrate(assembled, flat);
 }
 
 // ---------------------------------------------------------------------------
