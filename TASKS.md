@@ -10,7 +10,7 @@ Only edit **your own** person's section, plus the shared gates at the top.
 
 ## Gates — everyone watches these
 
-- [ ] **1:05 · CONTRACTS FROZEN** — `src/lib/contracts.ts` pushed, A announces in chat
+- [x] **1:05 · CONTRACTS FROZEN** — `src/lib/contracts.ts` pushed, A announces in chat
 - [ ] **1:20 · FIXTURES UP** — `data/fixtures/` has valid `evidence.json`, `pricing.json`, `battlecard.json`. B, C, D are idle until this lands.
 - [ ] **2:00 · Checkpoint 1** — 5-min standup. Live Vercel URL exists. Contract problems surface now or never.
 - [ ] **2:45 · Checkpoint 2** — first end-to-end run. It will break; that's why it's now.
@@ -24,7 +24,7 @@ Only edit **your own** person's section, plus the shared gates at the top.
 
 **Blocks everyone. Contracts and fixtures come before your own features.**
 
-- [ ] `src/lib/contracts.ts` — all Zod schemas from §7 *(pre-seeded from the spec — review, correct, and announce the freeze; this file is yours alone from here)*
+- [x] `src/lib/contracts.ts` — all Zod schemas from §7 *(pre-seeded from the spec — review, correct, and announce the freeze; this file is yours alone from here)*
 - [ ] `data/fixtures/evidence.json` — valid `Evidence[]`, realistically messy
 - [ ] `data/fixtures/pricing.json` — valid `PriceTier[]`, include a `"Contact us"` tier with `price_amount: null`
 - [ ] `data/fixtures/battlecard.json` — one complete `Deliverable`, one stale `fetched_at`
