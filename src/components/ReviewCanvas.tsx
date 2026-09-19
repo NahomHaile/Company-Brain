@@ -126,6 +126,12 @@ function SentenceRow({
     }
   }
 
+  const cited = resolveEvidence(sentence.evidence_ids, evidence);
+
+  // Provenance wraps each plain run and risk spans sit between them, as
+  // siblings. Nesting a risk trigger inside a sentence-wide trigger produces a
+  // button inside a button: invalid, and unreadable to a screen reader. With no
+  // flags this is still a single trigger around the whole sentence.
   const body: ReactNode = segments.map((segment, i) =>
     segment.kind === "flag" ? (
       <RiskFlagSpan
@@ -136,7 +142,9 @@ function SentenceRow({
         {segment.text}
       </RiskFlagSpan>
     ) : (
-      <span key={`${sentence.id}:seg:${i}`}>{segment.text}</span>
+      <ProvenancePopover key={`${sentence.id}:seg:${i}`} evidence={cited}>
+        {segment.text}
+      </ProvenancePopover>
     ),
   );
 
@@ -179,11 +187,7 @@ function SentenceRow({
                 : ""
             }`}
           >
-            <ProvenancePopover
-              evidence={resolveEvidence(sentence.evidence_ids, evidence)}
-            >
-              {body}
-            </ProvenancePopover>
+            {body}
           </p>
         )}
 
