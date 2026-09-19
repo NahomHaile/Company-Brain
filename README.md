@@ -127,8 +127,15 @@ npm run dev
 Open `http://localhost:3000`. Both URL fields are prefilled with the demo pair, so the whole
 workflow is one click.
 
-`.env.local` is gitignored and no key has ever been committed —
-`git log -p | grep -i "sk-ant"` returns nothing.
+`.env.local` is gitignored and no key has ever been committed. Verify with:
+
+```bash
+git log -p --all | grep -E "sk-ant-[A-Za-z0-9_-]{20,}"   # must return nothing
+```
+
+Note the pattern rather than a bare `grep -i "sk-ant"`: this repo's own docs
+contain that string several times, so the loose check always "finds" something and
+teaches you to ignore it. The pattern above matches a real key and nothing else.
 
 ### The offline path
 
