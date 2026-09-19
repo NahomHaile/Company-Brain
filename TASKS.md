@@ -10,8 +10,8 @@ Only edit **your own** person's section, plus the shared gates at the top.
 
 ## Gates — everyone watches these
 
-- [ ] **1:05 · CONTRACTS FROZEN** — `src/lib/contracts.ts` pushed, A announces in chat
-- [ ] **1:20 · FIXTURES UP** — `data/fixtures/` has valid `evidence.json`, `pricing.json`, `battlecard.json`. B, C, D are idle until this lands.
+- [x] **1:05 · CONTRACTS FROZEN** — `src/lib/contracts.ts` pushed, A announces in chat
+- [x] **1:20 · FIXTURES UP** — `data/fixtures/` has valid `evidence.json`, `pricing.json`, `battlecard.json`. B, C, D are idle until this lands.
 - [ ] **2:00 · Checkpoint 1** — 5-min standup. Live Vercel URL exists. Contract problems surface now or never.
 - [ ] **2:45 · Checkpoint 2** — first end-to-end run. It will break; that's why it's now.
 - [ ] **3:15 · FEATURE FREEZE — HARD**
@@ -24,19 +24,25 @@ Only edit **your own** person's section, plus the shared gates at the top.
 
 **Blocks everyone. Contracts and fixtures come before your own features.**
 
-- [ ] `src/lib/contracts.ts` — all Zod schemas from §7 *(pre-seeded from the spec — review, correct, and announce the freeze; this file is yours alone from here)*
-- [ ] `data/fixtures/evidence.json` — valid `Evidence[]`, realistically messy
-- [ ] `data/fixtures/pricing.json` — valid `PriceTier[]`, include a `"Contact us"` tier with `price_amount: null`
-- [ ] `data/fixtures/battlecard.json` — one complete `Deliverable`, one stale `fetched_at`
-- [ ] `src/lib/anthropic.ts` — client, `callClaude()`, JSON-only enforcement, fence stripping, one retry, Zod validation
-- [ ] **Verify the model ID resolves with one live call** (see CLAUDE.md — spec's `claude-sonnet-4-6` is unconfirmed)
-- [ ] `src/lib/fetch-page.ts` — robots.txt check, identifying UA, cheerio extract, 1 req/sec, cache
-- [ ] `src/lib/prompts/evidence.ts` — A2 evidence extractor → `Evidence[]`
-- [ ] A3 pricing extractor → `PriceTier[]`
-- [ ] `src/lib/pricing.ts` — deterministic comparison, **no model**
-- [ ] Number verifier — regex every number out of generated narrative, assert membership in the pricing table
-- [ ] `src/app/api/fetch/route.ts`
-- [ ] `src/app/api/ingest/route.ts` (recipe 2)
+- [x] `src/lib/contracts.ts` — all Zod schemas from §7 *(pre-seeded from the spec — review, correct, and announce the freeze; this file is yours alone from here)*
+- [x] `data/fixtures/evidence.json` — valid `Evidence[]`, realistically messy
+- [x] `data/fixtures/pricing.json` — valid `PriceTier[]`, include a `"Contact us"` tier with `price_amount: null`
+- [x] `data/fixtures/battlecard.json` — one complete `Deliverable`, one stale `fetched_at`
+- [x] `src/lib/anthropic.ts` — client, `callClaude()`, JSON-only enforcement, fence stripping, one retry, Zod validation
+- [x] **Verify the model ID resolves with one live call** — DONE, all five IDs resolve:
+      `claude-sonnet-5` (MODEL_MAIN), `claude-haiku-4-5` (MODEL_CHEAP), `claude-opus-5`
+      (MODEL_DEEP), and both unconfirmed IDs — spec §6's `claude-sonnet-4-6` **does
+      resolve**, as does `claude-haiku-4-5-20251001`. No 404 risk from the model string.
+      *(`scripts/verify-model.ts` had a top-level-`await` that tsx rejects under CJS, so
+      it could never run; wrapped in `main()`. The crash looked like a tsx error rather
+      than a missing key, which is why it read as blocked.)*
+- [x] `src/lib/fetch-page.ts` — robots.txt check, identifying UA, cheerio extract, 1 req/sec, cache
+- [x] `src/lib/prompts/evidence.ts` — A2 evidence extractor → `Evidence[]`
+- [x] A3 pricing extractor → `PriceTier[]`
+- [x] `src/lib/pricing.ts` — deterministic comparison, **no model**
+- [x] Number verifier — regex every number out of generated narrative, assert membership in the pricing table
+- [x] `src/app/api/fetch/route.ts`
+- [x] `src/app/api/ingest/route.ts` (recipe 2)
 - [ ] *(stretch, only if ahead at 2:30)*
 
 ## Person B — Competitive Analysis & Drafting
