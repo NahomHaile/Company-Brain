@@ -43,25 +43,67 @@ Only edit **your own** person's section, plus the shared gates at the top.
 
 **Work against A's fixtures. Do not wait for live routes.**
 
-> On branch `person-b/analysis-drafting`. Everything below is written, typechecks,
-> lints, and passes `next build`. **Nothing has been run against the live API yet** —
-> no `.env.local` exists and `ANTHROPIC_API_KEY` is unset, so `[~]` not `[x]`.
-> Working against a temporary shim in `src/lib/prompts/_dev/` (deleted when A lands).
+> On branch `person-b/analysis-drafting` (4 commits). Everything below typechecks,
+> lints, passes `next build`, and passes 127 automated spec checks
+> (`npx tsx src/lib/prompts/_dev/verify-b.ts`).
+>
+> **Still not verified live.** The battlecard pipeline ran end-to-end once and
+> passed 24/26 live checks, but that was against a different provider during a
+> brief detour. On Anthropic it has **never run**: the supplied key is
+> organization-scoped with `workspace_id: null` and the org has no workspaces, so
+> inference is rejected. Waiting on a workspace-scoped key. Hence `[~]`, not `[x]`.
+>
+> Temporary shim in `src/lib/prompts/_dev/` — deleted the moment A lands the real
+> client. `npx tsx src/lib/prompts/_dev/verify-live.ts` runs the live suite.
 
 - [~] B1 feature matrix → `FeatureRow[]`
 - [~] B2 differentiator ranker → `Differentiator[]`
 - [~] B3 positioning → `Section`
 - [~] B5 pivot points → `Section` *(the differentiator — give it your best hour)*
 - [~] B6 landmines / where they win → `Section`
-- [!] B4 pricing narrative → `Section` — prompt written; **blocked on A's `pricing.ts`**
-      for real `PriceComparison[]`. Testing against a hand-written table; not demo-safe.
+- [!] B4 pricing narrative → `Section` — prompt written and passing; **blocked on A's
+      `pricing.ts`** for real `PriceComparison[]`. The hand-written table it is tested
+      against is **not demo-safe**.
 - [~] B7 discovery questions → `Section`
-- [~] B9 assembly → `Deliverable` — **preserve evidence_ids through merges**
-- [~] Fan out all six section prompts with `Promise.all` — sequential is a demo-killer
-- [~] `FeatureMatrix.tsx`
-- [~] *(2:30)* investor-update recipe on the same engine
+- [~] B9 assembly → `Deliverable` — evidence_id preservation is now **enforced in
+      code**, not just asked for in the prompt; on violation we keep the unassembled draft
+- [~] Fan out all six section prompts — `Promise.allSettled`, measured parallel
+- [~] `FeatureMatrix.tsx` — **⚠ nothing imports it. C or D needs to render it or it
+      ships dead.** Props: `{ rows: FeatureRow[], ourLabel?, theirLabel? }`
+- [~] *(2:30)* investor-update recipe on the same engine — `?dev=1&recipe=investor_update`
 - [~] **Sixth section `we_win`** — spec §10 has no prompt for it though `contracts.ts`
       lists the key. Written as `WE_WIN_SYSTEM`. **Nobody else should write a second one.**
+
+### For A
+
+- `src/lib/anthropic.ts` — B's shim is on the frozen §9.3 `callClaude` signature, so
+  the swap is a one-line import change in `analyze.ts` and `draft.ts`. Worth keeping
+  from the shim: lazy client construction (at module scope a missing key breaks
+  `next build`, not just the request), a 30s per-call timeout, `stop_reason:
+  "max_tokens"` truncation detection, and a sonnet→haiku degradation chain.
+- **Model ID:** spec §6 pins `claude-sonnet-4-6`. It resolves, but `claude-sonnet-5`
+  is newer *and* cheaper ($2/$10 per MTok vs $3/$15). Shim uses Sonnet 5.
+- `contracts.ts` is still **unfrozen**. Everything B built validates against it as-is.
+
+### For C
+
+- B's output adds three fields alongside the `Deliverable`: `degraded`,
+  `missing_sections`, `warnings`. When `degraded` is true the canvas should show
+  something — a partial card currently renders as a whole one, which §4 forbids.
+- Sentence ids are namespaced `<section>_s1`. Guaranteed unique across sections, so
+  `risk_flags.sentence_id` and `grounding_issues.sentence_id` are safe to key on.
+- Citations pointing at nonexistent evidence are stripped before you see them, so a
+  provenance hover can never resolve to nothing. Stripped sentences end up with an
+  empty `evidence_ids`, which your audit already treats as unsourced.
+
+### For D
+
+- **README needs a prompt-injection limitation.** Evidence quotes are verbatim text
+  from competitor-controlled web pages, interpolated into prompts. Accepted risk for a
+  3-hour build, but it should be named in §4's "not built" list rather than left silent.
+- `.env.example` should mention `ANTHROPIC_WORKSPACE_ID` — org-scoped keys are
+  rejected without it.
+- Sample data is behind an explicit `?dev=1` and returns `synthetic: true`. **Badge it.**
 
 ## Person C — Grounding, Risk, Review Canvas
 
