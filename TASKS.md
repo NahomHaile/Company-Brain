@@ -43,17 +43,25 @@ Only edit **your own** person's section, plus the shared gates at the top.
 
 **Work against A's fixtures. Do not wait for live routes.**
 
-- [ ] B1 feature matrix → `FeatureRow[]`
-- [ ] B2 differentiator ranker → `Differentiator[]`
-- [ ] B3 positioning → `Section`
-- [ ] B5 pivot points → `Section` *(the differentiator — give it your best hour)*
-- [ ] B6 landmines / where they win → `Section`
-- [ ] B4 pricing narrative → `Section` *(narrate only values already in the table)*
-- [ ] B7 discovery questions → `Section`
-- [ ] B9 assembly → `Deliverable` — **preserve evidence_ids through merges**
-- [ ] Fan out all six section prompts with `Promise.all` — sequential is a demo-killer
-- [ ] `FeatureMatrix.tsx`
-- [ ] *(2:30)* investor-update recipe on the same engine
+> On branch `person-b/analysis-drafting`. Everything below is written, typechecks,
+> lints, and passes `next build`. **Nothing has been run against the live API yet** —
+> no `.env.local` exists and `ANTHROPIC_API_KEY` is unset, so `[~]` not `[x]`.
+> Working against a temporary shim in `src/lib/prompts/_dev/` (deleted when A lands).
+
+- [~] B1 feature matrix → `FeatureRow[]`
+- [~] B2 differentiator ranker → `Differentiator[]`
+- [~] B3 positioning → `Section`
+- [~] B5 pivot points → `Section` *(the differentiator — give it your best hour)*
+- [~] B6 landmines / where they win → `Section`
+- [!] B4 pricing narrative → `Section` — prompt written; **blocked on A's `pricing.ts`**
+      for real `PriceComparison[]`. Testing against a hand-written table; not demo-safe.
+- [~] B7 discovery questions → `Section`
+- [~] B9 assembly → `Deliverable` — **preserve evidence_ids through merges**
+- [~] Fan out all six section prompts with `Promise.all` — sequential is a demo-killer
+- [~] `FeatureMatrix.tsx`
+- [~] *(2:30)* investor-update recipe on the same engine
+- [~] **Sixth section `we_win`** — spec §10 has no prompt for it though `contracts.ts`
+      lists the key. Written as `WE_WIN_SYSTEM`. **Nobody else should write a second one.**
 
 ## Person C — Grounding, Risk, Review Canvas
 
