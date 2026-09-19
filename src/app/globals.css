@@ -128,3 +128,182 @@
     @apply font-sans;
   }
 }
+/* ── Print: the one-page pre-call sheet ────────────────────────────────────────
+   CADENCE-BUILD-SPEC.md §12.3. Person D.
+
+   ExportBar renders .cadence-print, hidden on screen. When the page prints we
+   hide everything else by visibility rather than by DOM structure, so this works
+   identically on the input screen and inside the review canvas. Maya reads this
+   thirty seconds before a call: it has to be one page. */
+
+.cadence-print {
+  display: none;
+}
+
+@media print {
+  html,
+  body {
+    background: #fff !important;
+    height: auto !important;
+  }
+
+  body * {
+    visibility: hidden !important;
+    box-shadow: none !important;
+  }
+
+  .cadence-print,
+  .cadence-print * {
+    visibility: visible !important;
+  }
+
+  @page {
+    size: letter portrait;
+    margin: 0.45in;
+  }
+
+  .cadence-print {
+    display: block !important;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    color: #000;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    font-size: 8pt;
+    line-height: 1.3;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .cadence-print .cp-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12pt;
+    border-bottom: 1.5pt solid #000;
+    padding-bottom: 4pt;
+  }
+
+  .cadence-print .cp-head h1 {
+    font-size: 13pt;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    line-height: 1.1;
+  }
+
+  .cadence-print .cp-subject {
+    font-size: 8.5pt;
+    color: #333;
+    margin-top: 1pt;
+  }
+
+  .cadence-print .cp-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 1pt;
+    font-size: 7pt;
+    color: #555;
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  .cadence-print .cp-brand {
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #000;
+  }
+
+  .cadence-print .cp-pricing {
+    display: flex;
+    flex-direction: column;
+    gap: 1pt;
+    margin-top: 5pt;
+    padding: 4pt 6pt;
+    background: #f2f2f2;
+    border-left: 2pt solid #000;
+    font-size: 7.5pt;
+  }
+
+  .cadence-print .cp-pricing-label {
+    font-size: 6.5pt;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #555;
+  }
+
+  .cadence-print .cp-pricing-row em {
+    color: #555;
+  }
+
+  .cadence-print .cp-body {
+    margin-top: 6pt;
+    column-count: 2;
+    column-gap: 16pt;
+    column-fill: auto;
+  }
+
+  .cadence-print .cp-section {
+    break-inside: avoid;
+    margin-bottom: 6pt;
+  }
+
+  .cadence-print .cp-section h2 {
+    font-size: 7pt;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #000;
+    border-bottom: 0.5pt solid #bbb;
+    padding-bottom: 1.5pt;
+    margin-bottom: 3pt;
+  }
+
+  .cadence-print .cp-section ul {
+    list-style: none;
+  }
+
+  .cadence-print .cp-section li {
+    padding-left: 6pt;
+    text-indent: -6pt;
+    margin-bottom: 2.5pt;
+  }
+
+  .cadence-print .cp-section li::before {
+    content: "▪ ";
+    color: #666;
+  }
+
+  .cadence-print .cp-flag {
+    font-weight: 700;
+    color: #000;
+    white-space: nowrap;
+  }
+
+  .cadence-print .cp-risks {
+    margin-top: 4pt;
+    padding: 3pt 5pt;
+    border: 0.75pt solid #000;
+    font-size: 7pt;
+    break-inside: avoid;
+  }
+
+  .cadence-print .cp-risk {
+    margin-right: 6pt;
+  }
+
+  .cadence-print .cp-foot {
+    display: flex;
+    flex-direction: column;
+    gap: 1pt;
+    margin-top: 4pt;
+    padding-top: 3pt;
+    border-top: 0.5pt solid #bbb;
+    font-size: 6pt;
+    color: #555;
+    word-break: break-word;
+  }
+}
