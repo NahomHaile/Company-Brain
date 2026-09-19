@@ -7,7 +7,7 @@
 Two URLs in. A competitor battlecard out — in a couple of minutes, with a verbatim
 receipt behind every single sentence.
 
-**▶ Live: https://company-brain-git-ryan-nahomhaile.vercel.app/**
+**▶ Live: [https://company-brain-git-ryan-nahomhaile.vercel.app/](https://company-brain-nahomhaile.vercel.app/)**
 
 `Chatathon 2026` · `Track 01 — Misneach` · `Northeastern`
 
