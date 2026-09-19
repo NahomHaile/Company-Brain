@@ -145,16 +145,14 @@
   body {
     background: #fff !important;
     height: auto !important;
+    min-height: 0 !important;
+    display: block !important;
   }
 
-  body * {
-    visibility: hidden !important;
-    box-shadow: none !important;
-  }
-
-  .cadence-print,
-  .cadence-print * {
-    visibility: visible !important;
+  /* ExportBar portals the sheet to <body>, so hiding its siblings here leaves
+     nothing behind — no phantom height, no blank second page. */
+  body > *:not(.cadence-print) {
+    display: none !important;
   }
 
   @page {
@@ -164,9 +162,6 @@
 
   .cadence-print {
     display: block !important;
-    position: absolute;
-    top: 0;
-    left: 0;
     width: 100%;
     color: #000;
     font-family: ui-sans-serif, system-ui, sans-serif;
@@ -243,7 +238,7 @@
     margin-top: 6pt;
     column-count: 2;
     column-gap: 16pt;
-    column-fill: auto;
+    column-fill: balance;
   }
 
   .cadence-print .cp-section {

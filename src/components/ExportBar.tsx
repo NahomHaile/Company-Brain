@@ -9,7 +9,8 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
+import { createPortal } from "react-dom";
 import { Check, Copy, Mail, Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { HonestyBadge } from "@/components/HonestyBadge";
@@ -55,6 +56,7 @@ export function ExportBar({ run }: { run: RunResult }) {
         <Button
           variant="outline"
           size="sm"
+          nativeButton={false}
           render={<a href={mailtoHref} />}
         >
           <Mail /> Email it to myself
@@ -62,9 +64,26 @@ export function ExportBar({ run }: { run: RunResult }) {
         <HonestyBadge kind="simulated-send" />
       </div>
 
-      <PrintSheet run={run} />
+      <PrintSheetPortal run={run} />
     </>
   );
+}
+
+/**
+ * The print sheet is portalled to <body> so it is a direct child of it. Print CSS
+ * then hides its siblings outright — hiding them in place leaves their height
+ * behind and you get a blank second page.
+ */
+const noopSubscribe = () => () => {};
+
+function PrintSheetPortal({ run }: { run: RunResult }) {
+  const mounted = useSyncExternalStore(
+    noopSubscribe,
+    () => true,
+    () => false,
+  );
+  if (!mounted) return null;
+  return createPortal(<PrintSheet run={run} />, document.body);
 }
 
 /** Hidden on screen, and the only thing visible when the page prints. One page. */
