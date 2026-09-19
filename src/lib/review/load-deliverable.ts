@@ -9,6 +9,7 @@ import { join } from "node:path";
 import { Deliverable, EvidenceArray } from "../contracts.ts";
 import type { Evidence } from "../contracts.ts";
 import { SAMPLE_DELIVERABLE, SAMPLE_EVIDENCE } from "./sample-deliverable.ts";
+import { withWordCount } from "./mutate.ts";
 
 // Fully literal paths. Building these from spread arguments defeats Turbopack's
 // static analysis, which then traces the whole project into the serverless
@@ -47,7 +48,9 @@ export function loadDeliverable(): LoadedDeliverable {
     );
 
     return {
-      deliverable,
+      // Recomputed, never trusted: fixtures carry a hand-written word_count
+      // and Person D's export reads that field straight out.
+      deliverable: withWordCount(deliverable),
       evidence,
       source: "fixture",
       fetchedAt: newestFetch(evidence),
@@ -55,7 +58,7 @@ export function loadDeliverable(): LoadedDeliverable {
   } catch {
     // Fixtures absent or invalid — fall back so the canvas always renders.
     return {
-      deliverable: SAMPLE_DELIVERABLE,
+      deliverable: withWordCount(SAMPLE_DELIVERABLE),
       evidence: SAMPLE_EVIDENCE,
       source: "sample",
       fetchedAt: newestFetch(SAMPLE_EVIDENCE),

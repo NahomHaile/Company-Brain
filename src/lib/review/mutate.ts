@@ -69,8 +69,11 @@ export function editSentence(
  * Person D's export reads `word_count` off the deliverable rather than
  * recomputing it, so every text change has to refresh it. A stale count ships
  * a card whose header contradicts its own prose.
+ *
+ * Also applied on load: a hand-authored fixture's count is a number nobody
+ * computed, which is the thing spec 3.1 exists to prevent.
  */
-function withWordCount(deliverable: Deliverable): Deliverable {
+export function withWordCount(deliverable: Deliverable): Deliverable {
   return { ...deliverable, word_count: wordCount(deliverable) };
 }
 

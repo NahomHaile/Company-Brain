@@ -6,6 +6,7 @@ import {
   pendingFlagsFor,
   openFlagCount,
   wordCount,
+  withWordCount,
 } from "./mutate.ts";
 import { SAMPLE_DELIVERABLE } from "./sample-deliverable.ts";
 
@@ -105,4 +106,10 @@ test("redacting refreshes word_count too", () => {
 test("approving leaves word_count untouched because the text did not change", () => {
   const next = resolveFlag(SAMPLE_DELIVERABLE, "rf_002", "approved");
   assert.equal(next.word_count, SAMPLE_DELIVERABLE.word_count);
+});
+
+test("withWordCount corrects a count the fixture got wrong", () => {
+  // Person A's battlecard.json shipped word_count 612 against 599 real words.
+  const wrong = { ...SAMPLE_DELIVERABLE, word_count: 9999 };
+  assert.equal(withWordCount(wrong).word_count, wordCount(SAMPLE_DELIVERABLE));
 });
