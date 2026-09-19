@@ -42,10 +42,21 @@ export function loadDeliverable(): LoadedDeliverable {
     // Prefer evidence embedded in the deliverable; fall back to the separate
     // fixture. A deliverable that carries its own evidence is portable, which
     // is what makes Person D's `?demo=cached` run show real provenance.
+    // Parsed separately: a valid battlecard plus a missing or malformed
+    // evidence.json should still render the card, with its sentences honestly
+    // marked unsourced — not fall back to synthetic sample data.
     const embedded = (raw as { evidence?: unknown }).evidence;
-    const evidence = EvidenceArray.parse(
-      embedded ?? JSON.parse(readFileSync(EVIDENCE_PATH, "utf8")),
-    );
+    let evidence: Evidence[] = [];
+    try {
+      evidence = EvidenceArray.parse(
+        embedded ?? JSON.parse(readFileSync(EVIDENCE_PATH, "utf8")),
+      );
+    } catch (error) {
+      console.warn(
+        "[cadence] battlecard.json loaded but its evidence did not:",
+        error instanceof Error ? error.message : error,
+      );
+    }
 
     return {
       // Recomputed, never trusted: fixtures carry a hand-written word_count
@@ -55,8 +66,14 @@ export function loadDeliverable(): LoadedDeliverable {
       source: "fixture",
       fetchedAt: newestFetch(evidence),
     };
-  } catch {
-    // Fixtures absent or invalid — fall back so the canvas always renders.
+  } catch (error) {
+    // No battlecard fixture, or it does not match the contract.
+    if ((error as NodeJS.ErrnoException)?.code !== "ENOENT") {
+      console.warn(
+        "[cadence] falling back to the sample deliverable:",
+        error instanceof Error ? error.message : error,
+      );
+    }
     return {
       deliverable: withWordCount(SAMPLE_DELIVERABLE),
       evidence: SAMPLE_EVIDENCE,

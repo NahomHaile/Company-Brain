@@ -114,7 +114,11 @@ function SentenceRow({
 
   const { matched, unmatched } = partitionFlags(sentence.text, flags);
   const segments = segmentSentence(sentence.text, matched);
-  const unsourced = sentence.evidence_ids.length === 0;
+  const cited = resolveEvidence(sentence.evidence_ids, evidence);
+  // Judged on resolved evidence, not on the id count: a sentence citing an id
+  // with no matching record would otherwise look fully sourced and show an
+  // empty hover. A citation that resolves to nothing is not a source.
+  const unsourced = cited.length === 0;
 
   function startEditing() {
     cancelled.current = false;
@@ -129,8 +133,6 @@ function SentenceRow({
       onEdit(next);
     }
   }
-
-  const cited = resolveEvidence(sentence.evidence_ids, evidence);
 
   // Provenance wraps each plain run and risk spans sit between them, as
   // siblings. Nesting a risk trigger inside a sentence-wide trigger produces a

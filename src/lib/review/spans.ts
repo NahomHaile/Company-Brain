@@ -18,9 +18,19 @@ function locate(text: string, flags: RiskFlag[]): Hit[] {
     if (start < 0) continue;
     hits.push({ start, end: start + flag.span.length, flag });
   }
-  hits.sort((a, b) => a.start - b.start);
-  // Overlapping spans can't both be highlighted; first by position wins.
-  return hits.filter((hit, i, kept) => i === 0 || hit.start >= kept[i - 1].end);
+  hits.sort((a, b) => a.start - b.start || b.end - a.end);
+
+  // Overlapping spans cannot both be highlighted; first by position wins.
+  // This must compare against spans already KEPT, not against the previous
+  // candidate: filter's third argument is the source array, so a dropped span
+  // could still admit a later one that overlapped a kept span, and
+  // segmentSentence would then emit that overlap twice.
+  const kept: Hit[] = [];
+  for (const hit of hits) {
+    const last = kept[kept.length - 1];
+    if (!last || hit.start >= last.end) kept.push(hit);
+  }
+  return kept;
 }
 
 export function segmentSentence(text: string, flags: RiskFlag[]): Segment[] {
@@ -39,12 +49,19 @@ export function segmentSentence(text: string, flags: RiskFlag[]): Segment[] {
   return segments.length > 0 ? segments : [{ kind: "plain", text }];
 }
 
-/** After an edit a span may no longer appear. Unmatched flags are surfaced, never dropped. */
+/**
+ * Splits flags into the ones the canvas will actually highlight and the ones it
+ * will not. Derived from `locate` rather than a separate `includes` check: if
+ * these two disagree, a flag can be highlighted nowhere AND absent from the
+ * "no longer matches" strip, leaving no control anywhere to resolve it while it
+ * still counts as open. Every pending flag must land in exactly one bucket.
+ */
 export function partitionFlags(text: string, flags: RiskFlag[]) {
+  const highlighted = new Set(locate(text, flags).map((hit) => hit.flag.id));
   const matched: RiskFlag[] = [];
   const unmatched: RiskFlag[] = [];
   for (const flag of flags) {
-    (text.includes(flag.span) ? matched : unmatched).push(flag);
+    (highlighted.has(flag.id) ? matched : unmatched).push(flag);
   }
   return { matched, unmatched };
 }

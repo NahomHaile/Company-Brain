@@ -81,3 +81,45 @@ test("redaction leaves text untouched when the span is gone", () => {
   const text = "VetFlow charges $200.";
   assert.equal(applyRedaction(text, flag("the only platform")), text);
 });
+
+test("a nested span never duplicates text on screen", () => {
+  // Regression: the overlap filter compared against the source array rather
+  // than survivors, so a span overlapping an already-kept one was kept too and
+  // its text was emitted twice ("chargescharges").
+  const text = "It is the only platform that charges over $200 a seat.";
+  const segs = segmentSentence(text, [
+    flag("the only platform that charges", { id: "A" }),
+    flag("only", { id: "B" }),
+    flag("charges over $200", { id: "C" }),
+  ]);
+  assert.equal(segs.map((s) => s.text).join(""), text);
+});
+
+test("partitionFlags agrees with what is actually highlighted", () => {
+  // Regression: partitionFlags used indexOf while segmentSentence dropped
+  // overlaps, so a dropped flag was reported matched — highlighted nowhere and
+  // absent from the unmatched strip, leaving no way to resolve it.
+  const text = "It is the only platform that charges over $200 a seat.";
+  const flags = [
+    flag("the only platform that charges", { id: "A" }),
+    flag("only", { id: "B" }),
+    flag("charges over $200", { id: "C" }),
+  ];
+  const { matched, unmatched } = partitionFlags(text, flags);
+  const highlighted = segmentSentence(text, matched)
+    .filter((s) => s.kind === "flag")
+    .map((s) => s.flag.id);
+
+  assert.deepEqual(matched.map((f) => f.id).sort(), highlighted.sort());
+  // Every flag is reachable: highlighted, or listed as no-longer-matching.
+  assert.equal(matched.length + unmatched.length, flags.length);
+});
+
+test("an overlapped flag is surfaced rather than lost", () => {
+  const text = "It is the only platform that charges over $200 a seat.";
+  const { unmatched } = partitionFlags(text, [
+    flag("the only platform that charges", { id: "A" }),
+    flag("only", { id: "B" }),
+  ]);
+  assert.deepEqual(unmatched.map((f) => f.id), ["B"]);
+});

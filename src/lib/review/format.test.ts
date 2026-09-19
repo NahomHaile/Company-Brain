@@ -69,3 +69,11 @@ test("money renders an em dash for an absent figure", () => {
   assert.equal(money(null), "—");
   assert.equal(money(145), "$145");
 });
+
+test("a repeating percentage is rounded, not dumped raw", () => {
+  // 29/174 = 16.666666666666664 — raw, this reads as a bug on a battlecard.
+  assert.equal(
+    priceDeltaLabel(row({ delta_abs: 29, delta_pct: 16.666666666666664 })).text,
+    "$29 (16.7%) cheaper",
+  );
+});

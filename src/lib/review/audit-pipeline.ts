@@ -81,9 +81,18 @@ export async function runAudit({
 
   return withWordCount({
     ...rewritten,
+    // C1 rewrites prose only. It echoes these back, and an echoed table is a
+    // number the model produced — restore the deterministic ones (spec 3.1).
+    price_comparisons: deliverable.price_comparisons,
+    feature_matrix: deliverable.feature_matrix,
     grounding_issues: [
       ...modelIssues,
-      ...checkNumbers(rewritten, modelIssues, verifyNumbers),
+      ...checkNumbers(
+        rewritten,
+        modelIssues,
+        verifyNumbers,
+        deliverable.price_comparisons,
+      ),
     ],
     risk_flags: riskFlags,
   });
@@ -98,6 +107,7 @@ function checkNumbers(
   deliverable: Deliverable,
   modelIssues: GroundingIssue[],
   verifyNumbers: NumberVerifier,
+  comparisons: PriceComparison[],
 ): GroundingIssue[] {
   const alreadyFlagged = new Set(
     modelIssues
@@ -109,10 +119,7 @@ function checkNumbers(
   for (const section of deliverable.sections) {
     for (const sentence of section.sentences) {
       if (alreadyFlagged.has(sentence.id)) continue;
-      for (const detail of verifyNumbers(
-        sentence.text,
-        deliverable.price_comparisons,
-      )) {
+      for (const detail of verifyNumbers(sentence.text, comparisons)) {
         found.push({
           sentence_id: sentence.id,
           issue: "number_not_in_table",

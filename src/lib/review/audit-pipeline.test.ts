@@ -182,3 +182,27 @@ test("a malformed model response is rejected by its schema", async () => {
     }),
   );
 });
+
+test("the model cannot replace the deterministic pricing table", () => {
+  // C1 rewrites prose and echoes the tables back. An echoed table is a number
+  // the model produced, which spec 3.1 forbids.
+  const tampered: Deliverable = {
+    ...SAMPLE_DELIVERABLE,
+    price_comparisons: [{
+      our_tier: "Practice", their_tier: "Professional",
+      normalized_monthly_per_seat_ours: 1, normalized_monthly_per_seat_theirs: 999,
+      delta_abs: 998, delta_pct: 99.9, cheaper: "ours", caveat: null,
+    }],
+    feature_matrix: [],
+  };
+  const fake = fakeCaller({ c1: tampered });
+  return runAudit({
+    deliverable: SAMPLE_DELIVERABLE,
+    evidence: SAMPLE_EVIDENCE,
+    callClaude: fake.call,
+    verifyNumbers: noVerifier,
+  }).then((out) => {
+    assert.deepEqual(out.price_comparisons, SAMPLE_DELIVERABLE.price_comparisons);
+    assert.deepEqual(out.feature_matrix, SAMPLE_DELIVERABLE.feature_matrix);
+  });
+});

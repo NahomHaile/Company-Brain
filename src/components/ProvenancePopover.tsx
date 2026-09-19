@@ -14,6 +14,9 @@ function formatFetched(iso: string): string {
   return new Date(iso).toLocaleDateString("en-US", {
     month: "long",
     day: "numeric",
+    // Pinned for the same reason timeOfDay is: an unpinned zone can print a
+    // different day here than the grounding note shows.
+    timeZone: "America/New_York",
   });
 }
 

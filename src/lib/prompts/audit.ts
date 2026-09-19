@@ -53,7 +53,16 @@ Categories:
 - "absolute_superiority_claim": "the only", "the best", "nobody else" — comparative advertising exposure.
 - "confidential_pricing": our internal discounting or margin.
 
-For each: the exact span, the category, a severity of "low", "medium" or "high", a one-sentence "why", and a "suggested_alternative" that keeps the point while removing the exposure.
+Return one object per flag with EVERY one of these fields:
+- "id": a unique string, "rf_001", "rf_002", and so on.
+- "sentence_id": the id of the sentence the span appears in, copied from the input.
+- "span": the exact text, see below.
+- "category": one of the five above.
+- "severity": "low", "medium" or "high".
+- "why": one sentence.
+- "suggested_alternative": phrasing that keeps the point while removing the exposure.
+
+Omitting "id" or "sentence_id" fails validation and the whole audit is discarded.
 
 The "span" MUST be copied character for character from the sentence text, including punctuation and casing. It is matched by exact substring search to highlight it in place; a paraphrased or re-punctuated span silently fails to match and the warning is demoted out of the text. Prefer the shortest span that carries the risk, and never let two spans on one sentence overlap.
 

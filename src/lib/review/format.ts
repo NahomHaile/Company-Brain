@@ -7,6 +7,11 @@
 // to prevent.
 import type { PriceComparison } from "../contracts.ts";
 
+/** One decimal at most, and no trailing .0 — these are read aloud on a call. */
+function round(value: number): number {
+  return Math.round(value * 10) / 10;
+}
+
 export function money(value: number | null): string {
   return value === null ? "—" : `$${value}`;
 }
@@ -32,8 +37,9 @@ export function priceDeltaLabel(row: PriceComparison): PriceDeltaLabel {
 
   // Direction comes from the enum, magnitude from the figure. pricing.ts may
   // emit `ours - theirs`, so a raw negative must never reach the card.
-  const amount = Math.abs(row.delta_abs);
-  const percent = Math.abs(row.delta_pct);
+  const amount = round(Math.abs(row.delta_abs));
+  // 16.666666666666664% on a battlecard reads as a bug, not a number.
+  const percent = round(Math.abs(row.delta_pct));
   const direction = row.cheaper === "ours" ? "cheaper" : "more expensive";
 
   return { kind: "delta", text: `$${amount} (${percent}%) ${direction}` };
