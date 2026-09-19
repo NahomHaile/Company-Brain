@@ -1,0 +1,108 @@
+<!doctype html>
+<!--
+  SYNTHETIC FIXTURE — not a real page.
+
+  VetFlow is an invented competitor created for the Cadence demo. This file
+  exists so the pipeline has a deterministic input when conference wifi dies
+  or a live fetch fails (spec §9.4 step 6). Any surface rendered from this
+  file must carry the CACHED badge (§4).
+
+  Deliberately includes nav/script/style/footer chrome so lib/fetch-page.ts
+  is exercised against realistic noise rather than pre-cleaned text.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Pricing — VetFlow</title>
+    <style>
+      .hero { font-size: 48px; color: #14324a; }
+      .tier { border: 1px solid #dfe6ec; padding: 24px; }
+    </style>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() { dataLayer.push(arguments); }
+      gtag("js", new Date());
+    </script>
+  </head>
+  <body>
+    <nav class="site-nav">
+      <a href="/">VetFlow</a>
+      <a href="/features">Features</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/integrations">Integrations</a>
+      <a href="/about">About</a>
+      <a href="/login">Log in</a>
+      <a href="/demo" class="cta">Book a demo</a>
+    </nav>
+
+    <main>
+      <h1 class="hero">Pricing that grows with your practice</h1>
+      <p>
+        Built for the modern practice, VetFlow brings everything under one roof.
+        Trusted by over 2,400 veterinary practices across North America.
+      </p>
+
+      <section class="tier">
+        <h2>Practice</h2>
+        <p><strong>$49 per user / month, billed annually. Minimum 5 users.</strong></p>
+        <ul>
+          <li>Single-location scheduling</li>
+          <li>Patient recall messaging</li>
+          <li>Client and patient records</li>
+          <li>Email support</li>
+        </ul>
+      </section>
+
+      <section class="tier">
+        <h2>Clinic</h2>
+        <p><strong>$948 per user / year.</strong> Everything in Practice, plus multi-location scheduling and the VetFlow API add-on.</p>
+        <ul>
+          <li>Multi-location scheduling</li>
+          <li>Native integrations with IDEXX, Antech, and QuickBooks</li>
+          <li>Priority support</li>
+        </ul>
+      </section>
+
+      <section class="tier">
+        <h2>Enterprise</h2>
+        <p><strong>Let's talk.</strong> Custom pricing for groups above 25 users.</p>
+        <ul>
+          <li>Everything in Clinic</li>
+          <li>Dedicated implementation team</li>
+          <li>Custom terms and SLA</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Add-ons</h2>
+        <p>
+          API access is available as an add-on on Clinic and Enterprise plans.
+          Contact sales for add-on pricing.
+        </p>
+      </section>
+
+      <section>
+        <h2>Getting started</h2>
+        <p>Our implementation team gets most practices live in under two weeks.</p>
+        <p>
+          Patient recall messaging keeps your clients coming back — automated
+          postcards, SMS and email on your schedule.
+        </p>
+      </section>
+    </main>
+
+    <footer>
+      <p>&copy; 2026 VetFlow Inc. All rights reserved.</p>
+      <a href="/privacy">Privacy</a>
+      <a href="/terms">Terms</a>
+      <a href="/careers">Careers — we're hiring!</a>
+      <p>Sign up for our newsletter and get the Practice Growth Handbook free.</p>
+    </footer>
+
+    <script>
+      document.querySelectorAll(".cta").forEach(function (el) {
+        el.addEventListener("click", function () { gtag("event", "cta_click"); });
+      });
+    </script>
+  </body>
+</html>

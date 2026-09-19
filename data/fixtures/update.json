@@ -1,0 +1,165 @@
+{
+  "recipe": "investor_update",
+  "title": "Thicket — September 2026",
+  "subject_label": "Thicket investor update — September 2026 — 11 recipients",
+  "sections": [
+    {
+      "key": "headline",
+      "title": "Headline",
+      "sentences": [
+        {
+          "id": "u_001",
+          "text": "MRR crossed $41K and we landed our biggest multi-site pilot, while two customers left over an integration we are still building.",
+          "evidence_ids": ["ev_101", "ev_103", "ev_102"]
+        }
+      ]
+    },
+    {
+      "key": "metrics",
+      "title": "Metrics",
+      "sentences": [
+        {
+          "id": "u_002",
+          "text": "MRR closed September at $41,200, up from $37,800 in August.",
+          "evidence_ids": ["ev_101"]
+        },
+        {
+          "id": "u_003",
+          "text": "Seven new practices signed and two churned, so net logo growth was five.",
+          "evidence_ids": ["ev_102"]
+        },
+        {
+          "id": "u_004",
+          "text": "Cash is $1.09M against roughly $78K monthly burn, which is about 14 months of runway.",
+          "evidence_ids": ["ev_105"]
+        },
+        {
+          "id": "u_005",
+          "text": "Growth is accelerating and we expect to be at $60K MRR by December.",
+          "evidence_ids": []
+        }
+      ]
+    },
+    {
+      "key": "highlights",
+      "title": "Highlights",
+      "sentences": [
+        {
+          "id": "u_006",
+          "text": "Brookside Animal Hospital signed a ten-seat pilot across three locations — our largest multi-site deal, and the segment we think the company is actually for.",
+          "evidence_ids": ["ev_103"]
+        },
+        {
+          "id": "u_007",
+          "text": "The onboarding rebuild cut median time-to-live from 31 days to 12, which matters because slow onboarding is what we believe cost us Ridgeline.",
+          "evidence_ids": ["ev_110", "ev_104"]
+        },
+        {
+          "id": "u_008",
+          "text": "Our third engineer starts October 6.",
+          "evidence_ids": ["ev_109"]
+        }
+      ]
+    },
+    {
+      "key": "lowlights",
+      "title": "Lowlights",
+      "sentences": [
+        {
+          "id": "u_009",
+          "text": "We lost Ridgeline Veterinary to VetFlow; they cited the missing Antech integration, though a five-week onboarding was likely the larger cause.",
+          "evidence_ids": ["ev_104", "ev_102"]
+        },
+        {
+          "id": "u_010",
+          "text": "Antech remains the single most common reason we lose a deal, and it is in build for Q1 — that is the mitigation, and until it ships this keeps happening.",
+          "evidence_ids": ["ev_106"]
+        },
+        {
+          "id": "u_011",
+          "text": "We are letting our contract designer go at the end of the month.",
+          "evidence_ids": ["ev_109"]
+        }
+      ]
+    },
+    {
+      "key": "asks",
+      "title": "Asks",
+      "sentences": [
+        {
+          "id": "u_012",
+          "text": "Intros to multi-location veterinary groups in the Northeast running three to ten sites — that is the profile the Brookside pilot came from.",
+          "evidence_ids": ["ev_107", "ev_103"]
+        },
+        {
+          "id": "u_013",
+          "text": "We are planning a seed extension in Q1 and would like to start conversations now.",
+          "evidence_ids": ["ev_108"]
+        }
+      ]
+    }
+  ],
+  "price_comparisons": [],
+  "feature_matrix": [],
+  "risk_flags": [
+    {
+      "id": "rf_101",
+      "sentence_id": "u_013",
+      "span": "We are planning a seed extension in Q1 and would like to start conversations now",
+      "category": "unannounced_fundraise",
+      "severity": "high",
+      "why": "Maya's note says she is starting to think about an extension with nothing decided and no conversations started. Stating it as a plan to 11 investors sets a signal she cannot take back.",
+      "suggested_alternative": "We have not made a decision on a seed extension, but expect to have a clearer view by Q1 and will come to you first if we do.",
+      "status": "pending"
+    },
+    {
+      "id": "rf_102",
+      "sentence_id": "u_009",
+      "span": "We lost Ridgeline Veterinary to VetFlow",
+      "category": "named_churned_customer",
+      "severity": "medium",
+      "why": "Naming a churned customer in a forwardable document exposes the relationship and can reach the customer or the competitor.",
+      "suggested_alternative": "We lost a multi-doctor practice to VetFlow",
+      "status": "pending"
+    },
+    {
+      "id": "rf_103",
+      "sentence_id": "u_011",
+      "span": "letting our contract designer go at the end of the month",
+      "category": "personnel_detail",
+      "severity": "medium",
+      "why": "A single contractor is identifiable from this sentence, and the update goes to 11 people before the person has been told.",
+      "suggested_alternative": "We are winding down a design contract at the end of the month.",
+      "status": "pending"
+    },
+    {
+      "id": "rf_104",
+      "sentence_id": "u_005",
+      "span": "we expect to be at $60K MRR by December",
+      "category": "unverified_forward_claim",
+      "severity": "high",
+      "why": "No evidence supports this projection. A number given to investors becomes the bar you are measured against next quarter.",
+      "suggested_alternative": "If September's pace holds we would expect continued month-over-month growth into December.",
+      "status": "pending"
+    }
+  ],
+  "grounding_issues": [
+    {
+      "sentence_id": "u_005",
+      "issue": "unsourced",
+      "detail": "No evidence_ids. The $60K December figure appears nowhere in Maya's notes and was not derived from any provided metric."
+    },
+    {
+      "sentence_id": "u_013",
+      "issue": "overstated",
+      "detail": "Evidence ev_108 says 'starting to think about' with nothing decided. The sentence states a plan, which is stronger than the evidence supports."
+    },
+    {
+      "sentence_id": "u_003",
+      "issue": "number_not_in_table",
+      "detail": "The figure 'five' is arithmetic on 7 minus 2 rather than a stated number. Correct, but derived — verify before sending."
+    }
+  ],
+  "generated_at": "2026-09-19T17:54:00Z",
+  "word_count": 318
+}

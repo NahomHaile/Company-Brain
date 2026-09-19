@@ -1,0 +1,33 @@
+SYNTHETIC — Maya Okonkwo and Thicket are invented for the Cadence demo.
+This is the raw paste input for the investor-update recipe: the scratch notes
+a founder actually has before writing the monthly update. Messy on purpose.
+
+---
+
+sept numbers
+
+MRR closed the month at $41,200, up from $37,800 in August.
+Net new logos: 7. Churned: 2 (Ridgeline Veterinary and one single-doctor practice).
+Cash: $1.09M. Burn is running about $78K/month. That's ~14 months.
+
+wins
+- BROOKSIDE SIGNED!!! 3 locations, 10 seats. biggest multi-site win yet
+- Median time-to-live dropped from 31 days to 12 after we rebuilt onboarding in August.
+- two of the seven came from the Brookside referral, need to say thank you to Dana
+
+not wins
+Ridgeline left for VetFlow. They said it was the Antech integration. I think it was
+really onboarding — we took 5 weeks to get them live.
+Antech integration is in build. Targeting Q1. This is the #1 thing we lose deals on.
+
+team
+Hired Dev #3, starts Oct 6. Also letting our contract designer go at the end of the month.
+(haven't told her yet — do NOT put this in the update until I have)
+
+asks
+Need intros to multi-location practice groups in the Northeast, 3-10 sites.
+Starting to think about a seed extension in Q1 but nothing decided, haven't talked to anyone.
+
+misc / figure out later
+- should i mention the pricing page redesign? probably not, nobody cares
+- do i say anything about the vetflow thing
