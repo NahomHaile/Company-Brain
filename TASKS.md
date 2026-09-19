@@ -28,7 +28,7 @@ Only edit **your own** person's section, plus the shared gates at the top.
 - [x] `data/fixtures/evidence.json` — valid `Evidence[]`, realistically messy
 - [x] `data/fixtures/pricing.json` — valid `PriceTier[]`, include a `"Contact us"` tier with `price_amount: null`
 - [x] `data/fixtures/battlecard.json` — one complete `Deliverable`, one stale `fetched_at`
-- [ ] `src/lib/anthropic.ts` — client, `callClaude()`, JSON-only enforcement, fence stripping, one retry, Zod validation
+- [x] `src/lib/anthropic.ts` — client, `callClaude()`, JSON-only enforcement, fence stripping, one retry, Zod validation
 - [ ] **Verify the model ID resolves with one live call** (see CLAUDE.md — spec's `claude-sonnet-4-6` is unconfirmed)
 - [ ] `src/lib/fetch-page.ts` — robots.txt check, identifying UA, cheerio extract, 1 req/sec, cache
 - [ ] `src/lib/prompts/evidence.ts` — A2 evidence extractor → `Evidence[]`
