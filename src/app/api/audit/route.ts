@@ -16,8 +16,12 @@ import { AuditRequest, auditRun } from "@/lib/review/audit-request";
 
 export const runtime = "nodejs";
 
-/** Three model calls, two of them concurrent. Matches A's routes. */
-export const maxDuration = 60;
+/**
+ * Three model calls: C1, then C2 and C3 concurrently. Measured at ~134s
+ * against the six-section fixture battlecard — C1 is the serial head and has
+ * to re-emit every sentence it was given. A's 60 would kill a run that works.
+ */
+export const maxDuration = 300;
 
 export async function POST(request: Request) {
   let body: AuditRequest;

@@ -3,7 +3,12 @@ import assert from "node:assert/strict";
 import { runAudit, type ClaudeCaller } from "./audit-pipeline.ts";
 import { SAMPLE_DELIVERABLE, SAMPLE_EVIDENCE } from "./sample-deliverable.ts";
 import { wordCount } from "./mutate.ts";
-import { C1_DEROBOTIFY, C2_GROUNDING, C3_RISK } from "../prompts/audit.ts";
+import {
+  C1_DEROBOTIFY,
+  C2_GROUNDING,
+  C3_RISK,
+  buildDerobotifyInput,
+} from "../prompts/audit.ts";
 import type { Deliverable } from "../contracts.ts";
 
 /** Stands in for Person A's callClaude, recording how it was driven. */
@@ -205,4 +210,34 @@ test("the model cannot replace the deterministic pricing table", () => {
     assert.deepEqual(out.price_comparisons, SAMPLE_DELIVERABLE.price_comparisons);
     assert.deepEqual(out.feature_matrix, SAMPLE_DELIVERABLE.feature_matrix);
   });
+});
+
+test("C1 is not asked to echo the pricing table or feature matrix back", () => {
+  // It rewrites prose only, and runAudit restores both from the draft anyway.
+  // Sending them costs input tokens, costs output tokens echoing them, and is
+  // what truncated C1 at 8000 on a real six-section battlecard.
+  const sent = JSON.parse(buildDerobotifyInput(SAMPLE_DELIVERABLE));
+  assert.deepEqual(sent.price_comparisons, []);
+  assert.deepEqual(sent.feature_matrix, []);
+  assert.equal(sent.sections.length, SAMPLE_DELIVERABLE.sections.length);
+});
+
+test("C1 gets more room to answer than the 8000-token default", async () => {
+  // A full Deliverable does not fit in the default budget; callClaude throws
+  // ClaudeJsonError on truncation and the whole audit is lost.
+  let c1MaxTokens: number | undefined;
+  const call: ClaudeCaller = async (opts) => {
+    if (opts.system === C1_DEROBOTIFY) c1MaxTokens = opts.maxTokens;
+    return opts.schema.parse(opts.system === C1_DEROBOTIFY ? SAMPLE_DELIVERABLE : []);
+  };
+  await runAudit({
+    deliverable: SAMPLE_DELIVERABLE,
+    evidence: SAMPLE_EVIDENCE,
+    callClaude: call,
+    verifyNumbers: noVerifier,
+  });
+  assert.ok(
+    c1MaxTokens !== undefined && c1MaxTokens >= 16000,
+    `C1 maxTokens was ${c1MaxTokens}`,
+  );
 });

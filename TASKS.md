@@ -73,7 +73,7 @@ Only edit **your own** person's section, plus the shared gates at the top.
 - [x] Built to the design direction — two columns, highlighter / pencil / stamp annotations
 - [ ] *(stretch)* objection simulator
 
-**C is done — 12/12. 3:25 PM · branch `ryan` · PR #1 · 67 tests, lint, typecheck, build all clean.**
+**C is done — 12/12. 3:25 PM · branch `ryan` · PR #1 · 69 tests, lint, typecheck, build all clean.**
 
 Person A's branch is merged into `ryan`, and **the A→C handoff is verified live**: `/review`
 now renders A's real `battlecard.json` — 25 sentences, 20 evidence records, their actual

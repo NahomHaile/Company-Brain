@@ -95,8 +95,20 @@ export function buildAuditInput(deliverable: Deliverable, evidence: Evidence[]) 
   });
 }
 
+/**
+ * C1 rewrites prose and nothing else, and runAudit restores the pricing table
+ * and feature matrix from the draft regardless of what comes back. Sending
+ * them is paid for twice — once going in, once echoed back out — and on a real
+ * six-section battlecard that echo is what pushes C1 past its token cap and
+ * loses the whole audit. Blanking them also means C1 cannot alter a number
+ * even if the prompt failed to stop it (CLAUDE.md rule 1).
+ */
 export function buildDerobotifyInput(deliverable: Deliverable) {
-  return JSON.stringify(deliverable);
+  return JSON.stringify({
+    ...deliverable,
+    price_comparisons: [],
+    feature_matrix: [],
+  });
 }
 
 // Validate every model response before use. Unvalidated JSON from a model is a
