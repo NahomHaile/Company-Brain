@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Agent tooling scratch space. Gitignored, but flat config does not read
+    // .gitignore, so `npm run lint` would report on it.
+    ".remember/**",
   ]),
 ]);
 

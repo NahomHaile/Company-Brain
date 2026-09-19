@@ -115,19 +115,40 @@ Only edit **your own** person's section, plus the shared gates at the top.
 
 ## Person C — Grounding, Risk, Review Canvas
 
-**The canvas is the product surface. Build it entirely against `battlecard.json`.**
+- [x] `ReviewCanvas.tsx` · [x] `ProvenancePopover.tsx` · [x] `RiskFlag.tsx`
+- [x] Unsourced sentences get a visible warning treatment
+- [x] C1 de-robotify · [x] C2 grounding auditor · [x] C3 risk flagger
+- [x] Audit pipeline — C1 → `Promise.all([C2, C3])` → `verifyNumbers`
+- [x] **`src/app/api/audit/route.ts`** — unblocked by A's merge, registers as `ƒ /api/audit`
+- [x] `src/app/review/page.tsx` · [x] Inline editing on any sentence
+- [x] Wired to D's `sessionStorage` handoff (`cadence:run`)
+- [x] Built to the design direction — two columns, highlighter / pencil / stamp annotations
+- [ ] *(stretch)* objection simulator
 
-- [ ] `ReviewCanvas.tsx` against fixture `Deliverable` — zero dependency on B
-- [ ] `ProvenancePopover.tsx` — hover a sentence → verbatim `quote` + `source_url`. **Best five seconds of the demo. Make it instant.**
-- [ ] `RiskFlag.tsx` — inline highlight in the text, **not** a sidebar; click → category, why, suggested alternative, Approve / Redact
-- [ ] Unsourced sentences get a visible warning treatment
-- [ ] C1 de-robotify → `Deliverable`
-- [ ] C2 grounding auditor → `GroundingIssue[]`
-- [ ] C3 risk flagger → `RiskFlag[]`
-- [ ] `src/app/api/audit/route.ts` — run grounding + risk in parallel
-- [ ] `src/app/review/page.tsx`
-- [ ] Inline editing on any sentence
-- [ ] *(stretch, only if ahead at 2:45)*
+**C is done — 12/12. 3:25 PM · branch `ryan` · PR #1 · 67 tests, lint, typecheck, build all clean.**
+
+Person A's branch is merged into `ryan`, and **the A→C handoff is verified live**: `/review`
+now renders A's real `battlecard.json` — 25 sentences, 20 evidence records, their actual
+1:48 PM fetch time on the CACHED badge. The sample fallback no longer fires.
+
+`/api/audit` accepts `{ recipe, deliverable, evidence, price_tiers }` exactly as D's
+`pipeline-client.ts` posts it, and returns `{ deliverable }`. `price_tiers` is accepted and
+ignored — every number is checked against `deliverable.price_comparisons`, which A's
+`pricing.ts` computed.
+
+**Still needed from the rest of you:**
+1. **B — push, even unfinished.** `/api/analyze` and `/api/draft` are the only things left
+   between here and a live end-to-end run. A route returning a fixture is enough to wire against.
+2. **D — two integration points.** The canvas exposes an `exportBar` **render prop** handed your
+   exact `RunResult` shape *with Maya's edits applied*; import `ExportBar` into
+   `review-client.tsx` and it works. Swap your `HonestyBadge` in for C's inline one.
+   Note `/review` now prints to one page on its own (0.96 of A4) — compare with your PrintSheet
+   so we don't ship two print paths.
+3. **D — the favicon will break the build again** if regenerated as 8-bit RGB. Turbopack needs
+   RGBA; it was 500ing every route until re-encoded.
+4. **A — `Deliverable` still has no `evidence` field.** Provenance works because C falls back to
+   `evidence.json`, but a bare `Deliverable` can't self-resolve. Also `battlecard.json` says
+   `word_count: 612` against 599 real words — C recomputes on load, so the UI is right regardless.
 
 ## Person D — Shell, Export, Integration, Demo
 

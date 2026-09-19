@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test": "node --test \"src/**/*.test.ts\"",
     "fixtures": "npx --yes tsx scripts/validate-fixtures.ts",
     "verify-model": "npx --yes tsx scripts/verify-model.ts",
     "test:pricing": "npx --yes tsx scripts/test-pricing.ts",
