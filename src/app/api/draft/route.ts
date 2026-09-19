@@ -23,14 +23,16 @@ import {
 } from "@/lib/prompts/_dev/sample-evidence";
 import { SAMPLE_FOUNDER_NOTES } from "@/lib/prompts/_dev/sample-founder-notes";
 
-// MEASURED, not guessed: a clean live run took 94.4s (fan-out 14.3s,
-// assembly 80.1s). The previous 90s cap was BELOW the real runtime and would
-// have 504'd on Vercel.
+// 60, not 300: Vercel Hobby rejects any maxDuration above 60 at DEPLOY time.
+// It is not clamped or warned about — the deployment fails outright, so a
+// higher number means the repo does not host at all on a free account.
 //
-// D: verify this against the actual Vercel plan. Hobby caps serverless
-// functions well below 300s, and if the cap cannot be raised the route needs
-// to stream progress or the demo must run through §12.5's cached path.
-export const maxDuration = 300;
+// D — this matters for the demo: a clean live run measured 94.4s (fan-out
+// 14.3s, assembly 80.1s), which does NOT fit in 60s. Two options:
+//   1. Run the demo through §12.5's cached path (`?demo=cached`), or
+//   2. If the team is on Vercel Pro, raise this to 300 and live generation fits.
+// Deploying and falling back to cached beats not deploying.
+export const maxDuration = 60;
 export const runtime = "nodejs";
 
 const RequestBody = z.object({

@@ -11,9 +11,10 @@ import { buildFeatureMatrix, rankDifferentiators } from "@/lib/prompts/analyze";
 import { ModelOutputError } from "@/lib/prompts/_dev/call-claude";
 import { SAMPLE_EVIDENCE } from "@/lib/prompts/_dev/sample-evidence";
 
-// Two sequential model calls. Measured ~44s live (matrix 18.7s, ranker
-// 24.9s), so 60s left almost no margin.
-export const maxDuration = 120;
+// 60 is Vercel Hobby's hard ceiling — above it the deployment fails rather
+// than being clamped. Measured ~44s live (matrix 18.7s, ranker 24.9s), so this
+// fits, but with little margin on a slow day.
+export const maxDuration = 60;
 export const runtime = "nodejs";
 
 const RequestBody = z.object({
