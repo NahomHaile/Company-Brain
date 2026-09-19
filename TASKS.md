@@ -29,7 +29,13 @@ Only edit **your own** person's section, plus the shared gates at the top.
 - [x] `data/fixtures/pricing.json` — valid `PriceTier[]`, include a `"Contact us"` tier with `price_amount: null`
 - [x] `data/fixtures/battlecard.json` — one complete `Deliverable`, one stale `fetched_at`
 - [x] `src/lib/anthropic.ts` — client, `callClaude()`, JSON-only enforcement, fence stripping, one retry, Zod validation
-- [!] **Verify the model ID resolves with one live call** — blocked: no ANTHROPIC_API_KEY on this machine. `npm run verify-model` is written and ready. (see CLAUDE.md — spec's `claude-sonnet-4-6` is unconfirmed)
+- [x] **Verify the model ID resolves with one live call** — DONE, all five IDs resolve:
+      `claude-sonnet-5` (MODEL_MAIN), `claude-haiku-4-5` (MODEL_CHEAP), `claude-opus-5`
+      (MODEL_DEEP), and both unconfirmed IDs — spec §6's `claude-sonnet-4-6` **does
+      resolve**, as does `claude-haiku-4-5-20251001`. No 404 risk from the model string.
+      *(`scripts/verify-model.ts` had a top-level-`await` that tsx rejects under CJS, so
+      it could never run; wrapped in `main()`. The crash looked like a tsx error rather
+      than a missing key, which is why it read as blocked.)*
 - [x] `src/lib/fetch-page.ts` — robots.txt check, identifying UA, cheerio extract, 1 req/sec, cache
 - [x] `src/lib/prompts/evidence.ts` — A2 evidence extractor → `Evidence[]`
 - [x] A3 pricing extractor → `PriceTier[]`

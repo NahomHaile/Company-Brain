@@ -50,35 +50,46 @@ const MODELS: Array<[string, string]> = [
   ["dated haiku", "claude-haiku-4-5-20251001"],
 ];
 
-let failures = 0;
+// Wrapped in main() rather than top-level await: tsx transpiles this to CJS,
+// where top-level await is a hard transform error. The script could not run at
+// all before this — the failure looked like a tsx/esbuild crash, not a model
+// problem, so it was indistinguishable from the missing-key blocker.
+async function main() {
+  let failures = 0;
 
-for (const [label, model] of MODELS) {
-  try {
-    const response = await client.messages.create({
-      model,
-      max_tokens: 16,
-      messages: [{ role: "user", content: "Reply with the single word: ok" }],
-    });
-    const text = response.content
-      .filter((b) => b.type === "text")
-      .map((b) => (b as Anthropic.TextBlock).text)
-      .join("")
-      .trim();
-    console.log(`OK    ${label}  ${model}  → "${text}"`);
-  } catch (err) {
-    const isInUse = [MODEL_MAIN, MODEL_CHEAP, MODEL_DEEP].includes(model);
-    if (isInUse) failures++;
-    const status = err instanceof Anthropic.APIError ? err.status : "?";
-    console.log(
-      `${isInUse ? "FAIL" : "n/a "}  ${label}  ${model}  → ${status} ${(err as Error).message.slice(0, 120)}`,
-    );
+  for (const [label, model] of MODELS) {
+    try {
+      const response = await client.messages.create({
+        model,
+        max_tokens: 16,
+        messages: [{ role: "user", content: "Reply with the single word: ok" }],
+      });
+      const text = response.content
+        .filter((b) => b.type === "text")
+        .map((b) => (b as Anthropic.TextBlock).text)
+        .join("")
+        .trim();
+      console.log(`OK    ${label}  ${model}  → "${text}"`);
+    } catch (err) {
+      const isInUse = [MODEL_MAIN, MODEL_CHEAP, MODEL_DEEP].includes(model);
+      if (isInUse) failures++;
+      const status = err instanceof Anthropic.APIError ? err.status : "?";
+      console.log(
+        `${isInUse ? "FAIL" : "n/a "}  ${label}  ${model}  → ${status} ${(err as Error).message.slice(0, 120)}`,
+      );
+    }
   }
+
+  if (failures > 0) {
+    console.log(
+      `\n${failures} model ID(s) in lib/anthropic.ts do not resolve. Fix before anyone else runs a route.`,
+    );
+    process.exit(1);
+  }
+  console.log("\nAll model IDs in lib/anthropic.ts resolve.");
 }
 
-if (failures > 0) {
-  console.log(
-    `\n${failures} model ID(s) in lib/anthropic.ts do not resolve. Fix before anyone else runs a route.`,
-  );
+main().catch((err) => {
+  console.error("verify-model failed:", err);
   process.exit(1);
-}
-console.log("\nAll model IDs in lib/anthropic.ts resolve.");
+});
