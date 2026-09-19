@@ -57,46 +57,33 @@ Only edit **your own** person's section, plus the shared gates at the top.
 
 ## Person C — Grounding, Risk, Review Canvas
 
-**The canvas is the product surface. Build it entirely against `battlecard.json`.**
-
-- [x] `ReviewCanvas.tsx` against fixture `Deliverable` — zero dependency on B
-- [x] `ProvenancePopover.tsx` — hover a sentence → verbatim `quote` + `source_url`
-- [x] `RiskFlag.tsx` — inline highlight in the text, **not** a sidebar
+- [x] `ReviewCanvas.tsx` · [x] `ProvenancePopover.tsx` · [x] `RiskFlag.tsx`
 - [x] Unsourced sentences get a visible warning treatment
-- [x] C1 de-robotify → `Deliverable`
-- [x] C2 grounding auditor → `GroundingIssue[]`
-- [x] C3 risk flagger → `RiskFlag[]`
+- [x] C1 de-robotify · [x] C2 grounding auditor · [x] C3 risk flagger
 - [x] **Audit pipeline** — C1 → `Promise.all([C2, C3])` → `verifyNumbers`, fully tested
-- [~] `src/app/api/audit/route.ts` — ~10-line shim, waiting on A's branch to be mergeable
-- [x] `src/app/review/page.tsx`
-- [x] Inline editing on any sentence
+- [x] **Wired to D's `sessionStorage` handoff** — `/review` renders a live run
+- [x] `src/app/review/page.tsx` · [x] Inline editing on any sentence
+- [~] `src/app/api/audit/route.ts` — ~10-line shim, waiting on A's branch
 - [ ] *(stretch)* objection simulator
 
-**C status — 2:41 PM · branch `ryan` · 47 tests, lint, typecheck, build all clean.**
+**C status — 2:47 PM · branch `ryan` · PR #1 · 57 tests, lint, typecheck, build clean.**
 
-Canvas live at `/review`, verified end-to-end in a browser. **Tested against A's real
-fixtures on `origin/person-a`** — 6 sections, 25 sentences, 20 evidence, 4 flags,
-3 price rows. Parses, renders, no dangling evidence ids, every flag span matches.
+**D — I found and fixed our seam.** Your `pipeline-client.ts` writes the run to
+`sessionStorage['cadence:run']` and navigates to `/review`, but the canvas wasn't
+reading it, so Generate battlecard would have landed on sample data. `/review` now
+reads it and falls back to fixtures when absent. Verified both ways in a browser.
+Two things I need from you:
+- `ExportBar` takes `{ run }: RunResult`. The canvas exposes an `exportBar` **render prop** handed your exact shape *with Maya's edits applied* — import it into `review-client.tsx` and it works.
+- A live run shows **no** CACHED badge; cached and fixture runs do. Your `HonestyBadge` should replace my inline one so we don't ship two.
 
-A's branch isn't mergeable yet, so the audit pipeline takes `callClaude` and
-`verifyNumbers` as **injected parameters** typed against A's real signatures. It is
-built and tested now; `route.ts` is a ten-line shim the moment `lib/anthropic` lands:
+**B — nothing of yours exists on any branch.** `/api/analyze` and `/api/draft` are
+what D's pipeline calls, so **no live end-to-end run is possible until you ship.**
+The canvas has a `featureMatrix` slot waiting; send the prop signature.
 
-```ts
-const audited = await runAudit({
-  deliverable, evidence,
-  callClaude,      // from @/lib/anthropic
-  verifyNumbers,   // from @/lib/pricing
-});
-return NextResponse.json(audited);
-```
-
-**Still needed from the rest of you:**
-1. **A — `Deliverable` still has no `evidence` field**, and `battlecard.json` doesn't embed it. Provenance works today because C falls back to `evidence.json`, but **D's `?demo=cached` single-file run will show zero receipts**. One line: `evidence: z.array(Evidence)`.
-2. **A — `battlecard.json` says `word_count: 612`; the card has 599 words.** C now recomputes on load rather than trusting the field, so the UI is right either way, but the fixture literal is still wrong.
-3. **B — send the `<FeatureMatrix />` prop signature.** Canvas has the slot. C renders `price_comparisons` (unassigned in the spec).
-4. **D — read the reviewed deliverable from C's state, not the draft.** `RiskFlag.status` records the decision but not its effect on the text, so C holds the final copy. One shared CACHED badge component, please.
-5. **Everyone — Next 16 + shadcn v4 on Base UI, not Radix.** A's `MODEL_MAIN` is `claude-sonnet-5`, so the spec's unverified `claude-sonnet-4-6` is settled.
+**A — two asks stand.** `Deliverable` still has no `evidence` field (D worked around
+it by wrapping the demo fixture, but a bare `Deliverable` still can't self-resolve).
+And `battlecard.json` says `word_count: 612` against 599 real words — C recomputes on
+load so the UI is right, but the literal is wrong.
 
 ## Person D — Shell, Export, Integration, Demo
 
