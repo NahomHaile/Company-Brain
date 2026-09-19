@@ -12,6 +12,7 @@ import { Deliverable as DeliverableSchema, type Section } from "@/lib/contracts"
 import { buildFeatureMatrix, rankDifferentiators } from "../analyze";
 import { draftRecipe } from "../draft";
 import { SAMPLE_EVIDENCE, SAMPLE_PRICE_COMPARISONS } from "./sample-evidence";
+import { SAMPLE_FOUNDER_NOTES } from "./sample-founder-notes";
 
 // tsx does not read .env.local the way Next does.
 for (const line of readFileSync(".env.local", "utf8").split("\n")) {
@@ -175,6 +176,72 @@ async function main() {
   for (const s of deliverable.sections) {
     console.log(`\n  [${s.key}]`);
     for (const sentence of s.sentences.slice(0, 3)) {
+      console.log(`    • ${sentence.text}`);
+      console.log(`      ${sentence.evidence_ids.join(", ") || "(unsourced)"}`);
+    }
+  }
+
+  // -------------------------------------------------------------------------
+  group("Investor update — recipe 2 on the same engine");
+  const t4 = Date.now();
+  const iu = await draftRecipe("investor_update", {
+    evidence: SAMPLE_FOUNDER_NOTES,
+    subjectLabel: "Thicket — September 2026 investor update",
+  });
+  console.log(`  (${Date.now() - t4}ms)`);
+  if (iu.warnings.length) {
+    console.log(`  warnings:\n          - ${iu.warnings.join("\n          - ")}`);
+  }
+
+  const section2 = (key: string): Section | undefined =>
+    iu.deliverable.sections.find((s) => s.key === key);
+  const iuKnown = new Set(SAMPLE_FOUNDER_NOTES.map((e) => e.id));
+  const iuSentences = iu.deliverable.sections.flatMap((s) => s.sentences);
+
+  ok("Deliverable parses", DeliverableSchema.safeParse(iu.deliverable).success);
+  ok("tagged investor_update", iu.deliverable.recipe === "investor_update");
+  ok(
+    "all five sections present",
+    iu.deliverable.sections.length === 5,
+    iu.deliverable.sections.map((s) => s.key).join(", "),
+  );
+  ok("sentence ids globally unique", new Set(iuSentences.map((s) => s.id)).size === iuSentences.length);
+  ok("no dangling citations", iuSentences.every((s) => s.evidence_ids.every((id) => iuKnown.has(id))));
+  ok("headline offers 3 candidates", (section2("headline")?.sentences.length ?? 0) === 3);
+  ok("lowlights are non-empty", (section2("lowlights")?.sentences.length ?? 0) > 0);
+  ok("asks are non-empty", (section2("asks")?.sentences.length ?? 0) > 0);
+
+  // Nothing in the notes is derivable, so any unlisted figure is invented.
+  const iuAllowed = new Set<string>();
+  for (const note of SAMPLE_FOUNDER_NOTES) {
+    for (const n of note.quote.match(/\d[\d,]*\.?\d*/g) ?? []) {
+      iuAllowed.add(n.replace(/[.,]$/, ""));
+    }
+  }
+  const metricsText = section2("metrics")?.sentences.map((s) => s.text).join(" ") ?? "";
+  const iuUnbacked = (metricsText.match(/\d[\d,]*\.?\d*/g) ?? [])
+    .map((n) => n.replace(/[.,]$/, ""))
+    .filter((n) => !iuAllowed.has(n));
+  ok(
+    "metrics: states no number absent from the notes",
+    iuUnbacked.length === 0,
+    iuUnbacked.length ? `INVENTED: ${iuUnbacked.join(", ")}` : "every figure traced to founder notes",
+  );
+
+  // fn_006 is a deliberately unexplained drop. The prompt permits saying so
+  // outright; what it forbids is manufacturing a tidy cause.
+  const lowlightText =
+    section2("lowlights")?.sentences.map((s) => s.text).join(" ").toLowerCase() ?? "";
+  ok(
+    "lowlights engage with the unexplained metric drop (fn_006)",
+    /22|31|convers/.test(lowlightText),
+    lowlightText.slice(0, 160),
+  );
+
+  console.log("\n  Investor update output");
+  for (const s of iu.deliverable.sections) {
+    console.log(`\n  [${s.key}]`);
+    for (const sentence of s.sentences.slice(0, 2)) {
       console.log(`    • ${sentence.text}`);
       console.log(`      ${sentence.evidence_ids.join(", ") || "(unsourced)"}`);
     }

@@ -21,6 +21,7 @@ import {
   SAMPLE_EVIDENCE,
   SAMPLE_PRICE_COMPARISONS,
 } from "@/lib/prompts/_dev/sample-evidence";
+import { SAMPLE_FOUNDER_NOTES } from "@/lib/prompts/_dev/sample-founder-notes";
 
 // MEASURED, not guessed: a clean live run took 94.4s (fan-out 14.3s,
 // assembly 80.1s). The previous 90s cap was BELOW the real runtime and would
@@ -72,8 +73,13 @@ export async function POST(request: Request) {
             })()
           : {};
 
+      // Each recipe needs its own shape of evidence. The battlecard fixture is
+      // scraped web copy; the investor recipe needs founder_input with
+      // metric/win/loss/ask types, or it invents an update out of a
+      // competitor's pricing page.
       const result = await draftRecipe(devRecipe, {
-        evidence: SAMPLE_EVIDENCE,
+        evidence:
+          devRecipe === "battlecard" ? SAMPLE_EVIDENCE : SAMPLE_FOUNDER_NOTES,
         subjectLabel:
           devRecipe === "battlecard"
             ? "Thicket vs. VetFlow — for Brookside Animal Hospital"
