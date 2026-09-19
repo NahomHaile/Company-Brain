@@ -154,19 +154,24 @@ ignored — every number is checked against `deliverable.price_comparisons`, whi
 
 **You own the outcome. If integration fails, the project fails, and nobody else is watching for it.**
 
+> Everything ticked below is committed on `person-D` and **not yet pushed** — D pushes on the owner's say-so.
+> The route contract the shell calls is documented at the top of `src/lib/pipeline-client.ts`. A/B/C: build to it, or tell D and D will change the shell.
+
 - [x] `create-next-app`, deps, shadcn components installed
 - [x] Directory tree created so nobody invents a different one
 - [x] `.env.local` gitignored · `.env.example` committed
-- [ ] Public GitHub repo · **all four added as collaborators** · clone URL posted in chat
-- [ ] Vercel connected, placeholder deploys
-- [ ] `page.tsx` — two URL inputs + one **Generate battlecard** button, prefilled with the demo pair
-- [ ] `ProgressStages.tsx` — named stages: Fetching pages → Reading evidence → Comparing pricing → Ranking differences → Writing your card → Checking every claim
-- [ ] Badges from §4 on every simulated/cached surface
-- [ ] `update/page.tsx` paste box *(2:30; skip if behind)*
-- [ ] Export: copy-to-clipboard Markdown
-- [ ] Print stylesheet — **must fit one page**
-- [ ] `mailto:` with `SIMULATED SEND` badge
-- [ ] **(by 2:00) Vercel deploy live**
-- [ ] **(3:00) Cached demo run → `data/fixtures/demo-battlecard.json` + `?demo=cached`** — wifi insurance, non-negotiable
-- [ ] README: persona, bottleneck, §4 verbatim, §4.1 fetching ethics, setup, AI agents used
-- [ ] *(2:45 onward)* stop building, drive integration, own the A→B and B→C handoffs
+- [ ] Public GitHub repo · **all four added as collaborators** · clone URL posted in chat *(blocked: needs the owner's GitHub account)*
+- [ ] Vercel connected, placeholder deploys *(blocked: needs the owner's Vercel account)*
+- [x] `page.tsx` — two URL inputs + one **Generate battlecard** button, prefilled with the demo pair
+- [x] `ProgressStages.tsx` — named stages: Fetching pages → Reading evidence → Comparing pricing → Ranking differences → Writing your card → Checking every claim
+- [x] Badges from §4 on every simulated/cached surface — `CACHED`, `SIMULATED CONNECTOR`, `SIMULATED SEND`, plus `SYNTHETIC FIXTURE` while the cached run is hand-written
+- [x] `update/page.tsx` paste box, with the simulated Slack/CRM/calendar connectors
+- [x] Export: copy-to-clipboard Markdown, sources kept as footnotes
+- [x] Print stylesheet — **verified one page** at Letter
+- [x] `mailto:` with `SIMULATED SEND` badge
+- [ ] **(by 2:00) Vercel deploy live** *(blocked with the Vercel connection above)*
+- [~] **Cached demo run → `data/fixtures/demo-battlecard.json` + `?demo=cached`** — works offline now, but the file is hand-written from real quotes off both demo pages. **Replace it with a real captured run once the pipeline is live** and flip `captured_from_live_run` to `true`; the `SYNTHETIC FIXTURE` badge then disappears on its own.
+- [x] README: persona, bottleneck, §4 verbatim, §4.1 fetching ethics, setup, AI agents used
+- [ ] *(2:45 onward)* stop building, drive integration, own the A→B and B→C handoffs *(waiting on the first route to exist — every route currently 404s and the shell reports that honestly)*
+
+**Demo pair chosen and verified** (§16 says do this early — done): prospect `smalldoorvet.com/membership`, competitor `digitail.com/pricing`. Both return static HTML, both allowed by `robots.txt`, both content-rich. Digitail publishes **no prices at all**, which is a gift: every price comparison honestly reports `unknown` instead of a made-up percentage.
