@@ -35,8 +35,8 @@ Only edit **your own** person's section, plus the shared gates at the top.
 - [x] A3 pricing extractor → `PriceTier[]`
 - [x] `src/lib/pricing.ts` — deterministic comparison, **no model**
 - [x] Number verifier — regex every number out of generated narrative, assert membership in the pricing table
-- [ ] `src/app/api/fetch/route.ts`
-- [ ] `src/app/api/ingest/route.ts` (recipe 2)
+- [x] `src/app/api/fetch/route.ts`
+- [x] `src/app/api/ingest/route.ts` (recipe 2)
 - [ ] *(stretch, only if ahead at 2:30)*
 
 ## Person B — Competitive Analysis & Drafting

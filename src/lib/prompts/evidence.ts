@@ -121,6 +121,85 @@ function normalizeForMatch(s: string): string {
     .toLowerCase();
 }
 
+// ── A2b — Paste extractor (recipe 2) ───────────────────────────────────────
+//
+// Same Evidence type, same verbatim rule, different input. Founder notes are
+// messy in ways a marketing page is not: fragments, asides, things written
+// down precisely because they are NOT decided yet. That last category is what
+// Person C's risk flagger has to catch, so it must survive extraction rather
+// than being tidied away here.
+
+export const PASTE_SYSTEM = `You extract atomic facts from a founder's raw notes for a monthly investor update. One discrete fact per item.
+
+The \`quote\` field must be the VERBATIM span from the notes — copy it character for character, including informal phrasing, shorthand and typos. Never clean it up. The founder will be shown this quote to confirm what she actually wrote.
+
+Classify each item's \`type\` as one of: metric, win, loss, risk, ask, admin.
+
+These notes are private and unfinished. Extract what is written, including things that are hedged, uncertain, or explicitly marked as not-yet-decided or not-yet-announced. Do NOT resolve a hedge into a decision: if the note says "starting to think about X", the summary says she is starting to think about it, not that she plans it. A later step decides what is safe to send; your job is to represent the notes accurately, including their uncertainty.
+
+Set \`confidence\` below 0.6 when the note is speculative, hedged, or the founder is guessing at a cause.
+
+\`entities\` lists proper nouns: customers, competitors, people, products.`;
+
+export interface PasteExtractionInput {
+  text: string;
+  /** "Maya's notes — Sept 2026" or similar. Shown as provenance. */
+  sourceLabel: string;
+  startIndex?: number;
+}
+
+/**
+ * Run A2b over pasted text.
+ *
+ * Same verbatim post-check as the page extractor — provenance on an investor
+ * update matters for the same reason, minus the live-call stakes.
+ */
+export async function extractPasteEvidence(
+  input: PasteExtractionInput,
+): Promise<{ evidence: Evidence[]; dropped: string[] }> {
+  const startIndex = input.startIndex ?? 1;
+
+  const items = await callClaude({
+    system: PASTE_SYSTEM,
+    user: `Source label: ${input.sourceLabel}
+
+Return a JSON array of Evidence objects with exactly these fields:
+  id             — sequential, starting at "ev_${String(startIndex).padStart(3, "0")}"
+  recipe_role    — "founder_input"
+  source         — "paste"
+  source_label   — "${input.sourceLabel}"
+  source_url     — null
+  quote          — the verbatim span from the notes below
+  summary        — one clause, your own words, preserving any hedge
+  type           — metric | win | loss | risk | ask | admin
+  entities       — array of proper nouns in this item
+  confidence     — 0 to 1
+  fetched_at     — null
+
+Extract 8 to 15 items.
+
+NOTES:
+"""
+${input.text}
+"""`,
+    schema: EvidenceArray,
+    maxTokens: 8000,
+    model: MODEL_MAIN,
+    label: "A2b:paste",
+  });
+
+  const haystack = normalizeForMatch(input.text);
+  const evidence: Evidence[] = [];
+  const dropped: string[] = [];
+
+  for (const item of items) {
+    if (haystack.includes(normalizeForMatch(item.quote))) evidence.push(item);
+    else dropped.push(item.quote);
+  }
+
+  return { evidence, dropped };
+}
+
 // ── A3 — Pricing extractor ─────────────────────────────────────────────────
 
 export const PRICING_SYSTEM = `You extract published pricing tiers from a company's public pricing page, exactly as published.
