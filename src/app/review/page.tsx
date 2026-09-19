@@ -4,18 +4,11 @@
 // timezone — formatting them client-side renders two different strings.
 import { ReviewClient } from "./review-client";
 import { loadDeliverable } from "@/lib/review/load-deliverable";
+import { timeOfDay } from "@/lib/review/format";
 
 export const metadata = {
   title: "Review — Cadence",
 };
-
-function timeOfDay(iso: string): string {
-  return new Date(iso).toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-    timeZone: "America/New_York",
-  });
-}
 
 export default function ReviewPage() {
   const { deliverable, evidence, source, fetchedAt } = loadDeliverable();

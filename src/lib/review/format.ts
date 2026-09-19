@@ -38,3 +38,16 @@ export function priceDeltaLabel(row: PriceComparison): PriceDeltaLabel {
 
   return { kind: "delta", text: `$${amount} (${percent}%) ${direction}` };
 }
+
+/**
+ * One formatter for both sides of the render. page.tsx formats the fixture's
+ * timestamp on the server; review-client re-formats when a stored run arrives.
+ * Pinning the zone keeps SSR and hydration from disagreeing.
+ */
+export function timeOfDay(iso: string): string {
+  return new Date(iso).toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    timeZone: "America/New_York",
+  });
+}

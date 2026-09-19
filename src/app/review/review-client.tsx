@@ -1,44 +1,94 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
+import type { ReactNode } from "react";
 import { Badge } from "@/components/ui/badge";
 import { ReviewCanvas } from "@/components/ReviewCanvas";
-import type { Deliverable, Evidence } from "@/lib/contracts";
+import type { Deliverable, Evidence, PriceTier } from "@/lib/contracts";
 import { openFlagCount, wordCount } from "@/lib/review/mutate";
+import { timeOfDay } from "@/lib/review/format";
+import {
+  getServerStoredRunSnapshot,
+  getStoredRunSnapshot,
+  subscribeToStoredRun,
+} from "@/lib/review/stored-run";
 import { prose } from "@/lib/review/theme";
 
-function Stat({ children }: { children: React.ReactNode }) {
+/** Where the deliverable on screen came from. Drives the honesty badge (spec 4). */
+type Origin = "live" | "cached" | "fixture";
+
+/** Structurally Person D's RunResult, with Maya's edits applied. */
+export type ReviewedRun = {
+  deliverable: Deliverable;
+  evidence: Evidence[];
+  price_tiers: PriceTier[];
+  source: "live" | "cached";
+};
+
+function Stat({ children }: { children: ReactNode }) {
   return <span className="text-xs text-[#1A1A17]/55">{children}</span>;
 }
 
 export function ReviewClient({
   initialDeliverable,
-  evidence,
+  evidence: initialEvidence,
   draftedAt,
   cachedLabel,
+  exportBar,
 }: {
   initialDeliverable: Deliverable;
   evidence: Evidence[];
   /** Pre-formatted on the server so SSR and hydration agree on the timezone. */
   draftedAt: string;
   cachedLabel: string | null;
+  /**
+   * Person D's ExportBar goes here. It is a render prop, not a node, because
+   * the export must carry Maya's approvals and edits — not the draft.
+   */
+  exportBar?: (run: ReviewedRun) => ReactNode;
 }) {
-  const [deliverable, setDeliverable] = useState(initialDeliverable);
+  // Person D's pipeline writes the finished run to sessionStorage and then
+  // navigates here. This is a subscription to an external store, not state to
+  // synchronise, so the server snapshot renders the fixture and the client
+  // swaps the real run in without a hydration mismatch.
+  const stored = useSyncExternalStore(
+    subscribeToStoredRun,
+    getStoredRunSnapshot,
+    getServerStoredRunSnapshot,
+  );
+
+  // Maya's edits layer over whichever run is underneath.
+  const [edits, setEdits] = useState<Deliverable | null>(null);
+
+  const deliverable = edits ?? stored?.deliverable ?? initialDeliverable;
+  const evidence = stored?.evidence ?? initialEvidence;
+  const priceTiers: PriceTier[] = stored?.price_tiers ?? [];
+  const origin: Origin = stored?.source ?? "fixture";
+  const draftedLabel = stored
+    ? timeOfDay(stored.deliverable.generated_at)
+    : draftedAt;
 
   const openFlags = openFlagCount(deliverable);
   const gaps = deliverable.grounding_issues.length;
+
+  // A live run is the only thing that earns no badge.
+  const badge =
+    origin === "live"
+      ? null
+      : origin === "cached"
+        ? "CACHED — recorded demo run"
+        : cachedLabel;
 
   return (
     <div className="min-h-full bg-[#FCFCFA]">
       <div className="mx-auto flex max-w-[76ch] flex-col gap-8 px-6 py-12">
         <header className="flex flex-col gap-3">
-          {cachedLabel && (
-            // Honesty contract (spec 4): every cached surface says so on screen.
+          {badge && (
             <Badge
               variant="outline"
               className="w-fit border-[#B3701A]/40 bg-[#B3701A]/10 text-[#B3701A]"
             >
-              {cachedLabel}
+              {badge}
             </Badge>
           )}
           <h1
@@ -47,7 +97,7 @@ export function ReviewClient({
             {deliverable.subject_label}
           </h1>
           <div className="flex flex-wrap items-baseline gap-x-5 gap-y-1">
-            <Stat>Drafted {draftedAt}</Stat>
+            <Stat>Drafted {draftedLabel}</Stat>
             <Stat>{wordCount(deliverable)} words</Stat>
             <span
               className={`text-xs ${openFlags > 0 ? "text-[#A33A4A]" : "text-[#1A1A17]/55"}`}
@@ -69,10 +119,16 @@ export function ReviewClient({
         <ReviewCanvas
           deliverable={deliverable}
           evidence={evidence}
-          onChange={setDeliverable}
-          // Person B's FeatureMatrix and Person D's ExportBar slot in here.
-          // Both read `deliverable`, so they see Maya's edits, not the draft.
+          onChange={setEdits}
+          // Person B's FeatureMatrix slots in here.
         />
+
+        {exportBar?.({
+          deliverable,
+          evidence,
+          price_tiers: priceTiers,
+          source: origin === "live" ? "live" : "cached",
+        })}
       </div>
     </div>
   );
